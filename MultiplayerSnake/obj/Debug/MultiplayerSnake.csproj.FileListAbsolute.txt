@@ -1,0 +1,10 @@
+H:\Documents\Visual Studio 2019\Projects\MultiplayerSnake\MultiplayerSnake\bin\Debug\MultiplayerSnake.exe.config
+H:\Documents\Visual Studio 2019\Projects\MultiplayerSnake\MultiplayerSnake\bin\Debug\MultiplayerSnake.exe
+H:\Documents\Visual Studio 2019\Projects\MultiplayerSnake\MultiplayerSnake\bin\Debug\MultiplayerSnake.pdb
+H:\Documents\Visual Studio 2019\Projects\MultiplayerSnake\MultiplayerSnake\obj\Debug\MultiplayerSnake.csprojAssemblyReference.cache
+H:\Documents\Visual Studio 2019\Projects\MultiplayerSnake\MultiplayerSnake\obj\Debug\MultiplayerSnake.MainForm.resources
+H:\Documents\Visual Studio 2019\Projects\MultiplayerSnake\MultiplayerSnake\obj\Debug\MultiplayerSnake.Properties.Resources.resources
+H:\Documents\Visual Studio 2019\Projects\MultiplayerSnake\MultiplayerSnake\obj\Debug\MultiplayerSnake.csproj.GenerateResource.cache
+H:\Documents\Visual Studio 2019\Projects\MultiplayerSnake\MultiplayerSnake\obj\Debug\MultiplayerSnake.csproj.CoreCompileInputs.cache
+H:\Documents\Visual Studio 2019\Projects\MultiplayerSnake\MultiplayerSnake\obj\Debug\MultiplayerSnake.exe
+H:\Documents\Visual Studio 2019\Projects\MultiplayerSnake\MultiplayerSnake\obj\Debug\MultiplayerSnake.pdb
