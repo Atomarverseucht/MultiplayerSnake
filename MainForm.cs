@@ -1,16 +1,21 @@
-﻿using System;
+﻿using Firebase.Database;
+using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MultiplayerSnake
 {
     public partial class MainForm : Form
     {
-        FullScreen fullScreen;
+        private FullScreen fullScreen;
 
         // set the coordinate system dimensions (always 16:9)
         private const int snakeboardMaxX = 1280;
         private const int snakeboardMaxY = 720;
+
+        // database app secret
+        private string auth = "AIzaSyBbRpK_BcltEmRQzLAUCFykMHEq5PQWWz4";
 
         public MainForm()
         {
@@ -20,6 +25,15 @@ namespace MultiplayerSnake
             KeyPreview = true;
 
             this.resizeSnakeboard(this);
+
+            // connect to database
+            var firebaseClient = new FirebaseClient(
+                "https://psyched-canto-311609-default-rtdb.europe-west1.firebasedatabase.app",
+                new FirebaseOptions
+                {
+                    AuthTokenAsyncFactory = () => Task.FromResult(auth)
+                }
+            );
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
