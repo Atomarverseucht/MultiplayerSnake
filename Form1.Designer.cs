@@ -86,6 +86,7 @@
             this.MinimumSize = new System.Drawing.Size(850, 500);
             this.Name = "MainForm";
             this.Text = "Multiplayer Snake";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).EndInit();
             this.ResumeLayout(false);

@@ -8,6 +8,7 @@ namespace MultiplayerSnake
 {
     public partial class MainForm : Form
     {
+      
         // class to controll going in fullscreen with F11
         private FullScreen fullScreen;
 
@@ -91,6 +92,11 @@ namespace MultiplayerSnake
             // set scale multiplier for x and y
             //pbGame.Scale((float)snakeboardCalculatedWidth / snakeboardMaxX, (float)snakeboardCalculatedHeight / snakeboardMaxY);
             pbGame.BackColor = Color.Black;
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            DialogResult res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);   
         }
     }
 }
