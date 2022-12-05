@@ -56,10 +56,10 @@
             // lbSidebar
             // 
             this.lbSidebar.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbSidebar.Location = new System.Drawing.Point(6, 54);
+            this.lbSidebar.Location = new System.Drawing.Point(12, 63);
             this.lbSidebar.Name = "lbSidebar";
             this.lbSidebar.Padding = new System.Windows.Forms.Padding(0, 35, 0, 0);
-            this.lbSidebar.Size = new System.Drawing.Size(194, 1000);
+            this.lbSidebar.Size = new System.Drawing.Size(197, 883);
             this.lbSidebar.TabIndex = 3;
             this.lbSidebar.Text = "Online: 1/15\r\n\r\ntest: 23";
             // 

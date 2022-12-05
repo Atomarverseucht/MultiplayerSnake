@@ -11,7 +11,7 @@ namespace MultiplayerSnake
         // class to controll going in fullscreen with F11
         private FullScreen fullScreen;
 
-        // set the coordinate system dimensions (always 16:9)
+        // set the coordinate system resolution (always 16:9)
         private const int snakeboardMaxX = 1280;
         private const int snakeboardMaxY = 720;
 
