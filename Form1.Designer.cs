@@ -37,7 +37,7 @@
             // 
             // pbGame
             // 
-            this.pbGame.Location = new System.Drawing.Point(311, 89);
+            this.pbGame.Location = new System.Drawing.Point(312, 113);
             this.pbGame.Name = "pbGame";
             this.pbGame.Size = new System.Drawing.Size(477, 269);
             this.pbGame.TabIndex = 1;

@@ -8,6 +8,7 @@ namespace MultiplayerSnake
 {
     public partial class MainForm : Form
     {
+        // class to controll going in fullscreen with F11
         private FullScreen fullScreen;
 
         // set the coordinate system dimensions (always 16:9)
