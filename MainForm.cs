@@ -1,7 +1,6 @@
-﻿using Firebase.Database;
+﻿using MultiplayerSnake.Database;
 using System;
 using System.Drawing;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MultiplayerSnake
@@ -15,8 +14,8 @@ namespace MultiplayerSnake
         private const int snakeboardMaxX = 1280;
         private const int snakeboardMaxY = 720;
 
-        // database app secret
-        private string auth = "AIzaSyBbRpK_BcltEmRQzLAUCFykMHEq5PQWWz4";
+        // the database
+        private Firebase firebase;
 
         public MainForm()
         {
@@ -28,13 +27,26 @@ namespace MultiplayerSnake
             this.resizeSnakeboard(this);
 
             // connect to database
-            var firebaseClient = new FirebaseClient(
-                "https://psyched-canto-311609-default-rtdb.europe-west1.firebasedatabase.app",
-                new FirebaseOptions
+            firebase = new Firebase();
+
+            int databaseVersion = 0;
+            while (databaseVersion != DatabaseConstants.CLIENT_VERSION)
+            {
+                databaseVersion = firebase.queryOnce<int>(DatabaseConstants.KEY_VERSION);
+                if (databaseVersion > DatabaseConstants.CLIENT_VERSION)
                 {
-                    AuthTokenAsyncFactory = () => Task.FromResult(auth)
+                    MessageBox.Show("Your client is outdated. Please update your client to the newest version.", "Error");
+                    return;
                 }
-            );
+                else if (databaseVersion < DatabaseConstants.CLIENT_VERSION)
+                {
+
+                    if (MessageBox.Show("The database is outdated. Please wait for the database to update.", "Error") == DialogResult.Abort) return;
+
+                    return;
+                }
+            }
+            
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
