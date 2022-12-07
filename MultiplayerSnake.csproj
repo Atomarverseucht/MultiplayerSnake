@@ -60,6 +60,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Database\DatabaseConstants.cs" />
+    <Compile Include="Database\Firebase.cs" />
     <Compile Include="FullScreen.cs" />
     <Compile Include="InputBox.cs" />
     <Compile Include="MainForm.cs">
