@@ -92,7 +92,7 @@ namespace MultiplayerSnake
             this.firebase = new Firebase();
 
 
-            int databaseVersion = Int32.Parse(this.firebase.queryOnce<string>(DatabaseConstants.KEY_VERSION));
+            int databaseVersion = this.firebase.queryOnce<int>(DatabaseConstants.KEY_VERSION);
             if (databaseVersion > DatabaseConstants.CLIENT_VERSION)
             {
                 MessageBox.Show("Your client is outdated. Please update your client to the newest version.", "Error");
