@@ -38,7 +38,7 @@ namespace MultiplayerSnake
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex);
-                return default(T);
+                return default;
             }
         }
     }

@@ -26,28 +26,6 @@ namespace MultiplayerSnake
             KeyPreview = true;
 
             this.resizeSnakeboard(this);
-
-            // connect to database
-            firebase = new Firebase();
-
-            int databaseVersion = 0;
-            while (databaseVersion != DatabaseConstants.CLIENT_VERSION)
-            {
-                databaseVersion = firebase.queryOnce<int>(DatabaseConstants.KEY_VERSION);
-                if (databaseVersion > DatabaseConstants.CLIENT_VERSION)
-                {
-                    MessageBox.Show("Your client is outdated. Please update your client to the newest version.", "Error");
-                    return;
-                }
-                else if (databaseVersion < DatabaseConstants.CLIENT_VERSION)
-                {
-
-                    if (MessageBox.Show("The database is outdated. Please wait for the database to update.", "Error") == DialogResult.Abort) return;
-
-                    return;
-                }
-            }
-            
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
@@ -106,10 +84,38 @@ namespace MultiplayerSnake
             pbGame.BackColor = Color.Black;
         }
 
+        public string name; 
+
         private void MainForm_Load(object sender, EventArgs e)
         {
-            DialogResult res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
-            
+            // connect to database
+            this.firebase = new Firebase();
+
+
+            Console.WriteLine(this.firebase.queryOnce<string>(DatabaseConstants.KEY_VERSION));
+            int databaseVersion = Int32.Parse(this.firebase.queryOnce<string>(DatabaseConstants.KEY_VERSION));
+            Console.WriteLine(databaseVersion);
+            if (databaseVersion > DatabaseConstants.CLIENT_VERSION)
+            {
+                MessageBox.Show("Your client is outdated. Please update your client to the newest version.", "Error");
+            }
+            else if (databaseVersion < DatabaseConstants.CLIENT_VERSION)
+            {
+                MessageBox.Show("The database is outdated. Please wait for the database to update.", "Error");
+            }
+            else
+            {
+                DialogResult res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
+                name = InputBox.ResultValue;
+                paintBarChart(lbSidebar.CreateGraphics());
+            }
+            Application.Exit();
+        }
+
+        public void paintBarChart(Graphics g)
+        {
+            int maxScore = 35;
+            g.DrawRectangle(Pens.Black, 20,100,150,150);
         }
     }
 }
