@@ -8,7 +8,7 @@ namespace MultiplayerSnake
 {
     public static class InputBox
     {
-        private static System.Windows.Forms.Form frm = new System.Windows.Forms.Form();
+        private static Form frm = new Form();
         public static string ResultValue;
         private static DialogResult DialogRes;
         private static string[] buttonTextArray = new string[4];
@@ -41,6 +41,11 @@ namespace MultiplayerSnake
             Slovakian,
             Spanish
         }
+
+        static InputBox() {
+            SetLanguage(Language.English);
+        }
+
         /// <summary>
         /// This form is like a MessageBox, but you can select type of controls on it. 
         /// This form returning a DialogResult value.
@@ -56,33 +61,33 @@ namespace MultiplayerSnake
         /// 
         public static DialogResult ShowDialog(string Message, string Title = "",
         Icon icon = Icon.Information, Buttons buttons = Buttons.Ok, Type type = Type.Nothing,
-        string[] ListItems = null, bool ShowInTaskBar = false, Font FormFont = null)
+        string[] ListItems = null, bool ShowInTaskBar = true, Font FormFont = null)
         {
             frm.Controls.Clear();
             ResultValue = "";
             //Form definition
             frm.MaximizeBox = false;
             frm.MinimizeBox = false;
-            frm.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            frm.Size = new System.Drawing.Size(350, 170);
+            frm.FormBorderStyle = FormBorderStyle.FixedDialog;
+            frm.Size = new Size(350, 170);
             frm.Text = Title;
             frm.ShowIcon = false;
             frm.ShowInTaskbar = ShowInTaskBar;
-            frm.FormClosing += new System.Windows.Forms.FormClosingEventHandler(frm_FormClosing);
+            frm.FormClosing += new FormClosingEventHandler(frm_FormClosing);
             frm.StartPosition = FormStartPosition.CenterParent;
             //Panel definition
             Panel panel = new Panel();
-            panel.Location = new System.Drawing.Point(0, 0);
-            panel.Size = new System.Drawing.Size(340, 97);
-            panel.BackColor = System.Drawing.Color.White;
+            panel.Location = new Point(0, 0);
+            panel.Size = new Size(340, 97);
+            panel.BackColor = Color.White;
             frm.Controls.Add(panel);
             //Add icon in to panel
             panel.Controls.Add(Picture(icon));
             //Label definition (message)
-            System.Windows.Forms.Label label = new System.Windows.Forms.Label();
+            Label label = new Label();
             label.Text = Message;
-            label.Size = new System.Drawing.Size(245, 60);
-            label.Location = new System.Drawing.Point(90, 10);
+            label.Size = new Size(245, 60);
+            label.Location = new Point(90, 10);
             label.TextAlign = ContentAlignment.MiddleLeft;
             panel.Controls.Add(label);
             //Add buttons to the form
@@ -131,7 +136,7 @@ namespace MultiplayerSnake
             }
             frm.Close();
         }
-        private static void textBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        private static void textBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
@@ -139,14 +144,14 @@ namespace MultiplayerSnake
                 frm.Close();
             }
         }
-        private static void frm_FormClosing(object sender, System.Windows.Forms.FormClosingEventArgs e)
+        private static void frm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (DialogRes != null) { }
             else DialogRes = DialogResult.None;
         }
         private static PictureBox Picture(Icon icon)
         {
-            System.Windows.Forms.PictureBox picture = new System.Windows.Forms.PictureBox();
+            PictureBox picture = new PictureBox();
             var assembly = Assembly.GetExecutingAssembly();     //Get integrated sources
             System.IO.Stream stream = null;
             //Set icon
@@ -168,21 +173,21 @@ namespace MultiplayerSnake
                     stream = assembly.GetManifestResourceStream(@"MultiplayerSnake.nic80x80.png");
                     break;
             }
-            picture.Image = System.Drawing.Image.FromStream(stream);
-            picture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            picture.Size = new System.Drawing.Size(60, 60);
-            picture.Location = new System.Drawing.Point(10, 10);
+            picture.Image = Image.FromStream(stream);
+            picture.SizeMode = PictureBoxSizeMode.StretchImage;
+            picture.Size = new Size(60, 60);
+            picture.Location = new Point(10, 10);
             return picture;
         }
         private static Button[] Btns(Buttons button, Language lang = Language.English)
         {
             //Buttons field for return
-            System.Windows.Forms.Button[] returnButtons = new Button[3];
+            Button[] returnButtons = new Button[3];
             //Buttons instances
-            System.Windows.Forms.Button OkButton = new System.Windows.Forms.Button();
-            System.Windows.Forms.Button StornoButton = new System.Windows.Forms.Button();
-            System.Windows.Forms.Button AnoButton = new System.Windows.Forms.Button();
-            System.Windows.Forms.Button NeButton = new System.Windows.Forms.Button();
+            Button OkButton = new Button();
+            Button StornoButton = new Button();
+            Button AnoButton = new Button();
+            Button NeButton = new Button();
             //Set buttons names and text
             OkButton.Text = buttonTextArray[0];
             OkButton.Name = "OK";
@@ -196,27 +201,27 @@ namespace MultiplayerSnake
             switch (button)
             {
                 case Buttons.Ok:
-                    OkButton.Location = new System.Drawing.Point(250, 101);
+                    OkButton.Location = new Point(250, 101);
                     returnButtons[0] = OkButton;
                     break;
                 case Buttons.OkCancel:
-                    OkButton.Location = new System.Drawing.Point(170, 101);
+                    OkButton.Location = new Point(170, 101);
                     returnButtons[0] = OkButton;
-                    StornoButton.Location = new System.Drawing.Point(250, 101);
+                    StornoButton.Location = new Point(250, 101);
                     returnButtons[1] = StornoButton;
                     break;
                 case Buttons.YesNo:
-                    AnoButton.Location = new System.Drawing.Point(170, 101);
+                    AnoButton.Location = new Point(170, 101);
                     returnButtons[0] = AnoButton;
-                    NeButton.Location = new System.Drawing.Point(250, 101);
+                    NeButton.Location = new Point(250, 101);
                     returnButtons[1] = NeButton;
                     break;
                 case Buttons.YesNoCancel:
-                    AnoButton.Location = new System.Drawing.Point(90, 101);
+                    AnoButton.Location = new Point(90, 101);
                     returnButtons[0] = AnoButton;
-                    NeButton.Location = new System.Drawing.Point(170, 101);
+                    NeButton.Location = new Point(170, 101);
                     returnButtons[1] = NeButton;
-                    StornoButton.Location = new System.Drawing.Point(250, 101);
+                    StornoButton.Location = new Point(250, 101);
                     returnButtons[2] = StornoButton;
                     break;
             }
@@ -225,8 +230,8 @@ namespace MultiplayerSnake
             {
                 if (btn != null)
                 {
-                    btn.Size = new System.Drawing.Size(75, 23);
-                    btn.Click += new System.EventHandler(button_Click);
+                    btn.Size = new Size(75, 23);
+                    btn.Click += new EventHandler(button_Click);
                 }
             }
             return returnButtons;
@@ -234,10 +239,10 @@ namespace MultiplayerSnake
         private static Control Cntrl(Type type, string[] ListItems)
         {
             //ComboBox
-            System.Windows.Forms.ComboBox comboBox = new System.Windows.Forms.ComboBox();
-            comboBox.Size = new System.Drawing.Size(180, 22);
-            comboBox.Location = new System.Drawing.Point(90, 70);
-            comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            ComboBox comboBox = new ComboBox();
+            comboBox.Size = new Size(180, 22);
+            comboBox.Location = new Point(90, 70);
+            comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox.Name = "comboBox";
             if (ListItems != null)
             {
@@ -246,10 +251,10 @@ namespace MultiplayerSnake
                 comboBox.SelectedIndex = 0;
             }
             //Textbox
-            System.Windows.Forms.TextBox textBox = new System.Windows.Forms.TextBox();
-            textBox.Size = new System.Drawing.Size(180, 23);
-            textBox.Location = new System.Drawing.Point(90, 70);
-            textBox.KeyDown += new System.Windows.Forms.KeyEventHandler(textBox_KeyDown);
+            TextBox textBox = new TextBox();
+            textBox.Size = new Size(180, 23);
+            textBox.Location = new Point(90, 70);
+            textBox.KeyDown += new KeyEventHandler(textBox_KeyDown);
             textBox.Name = "textBox";
             //Set returned Control
             Control returnControl = new Control();

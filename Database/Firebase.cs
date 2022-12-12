@@ -19,6 +19,8 @@ namespace MultiplayerSnake
                     AuthTokenAsyncFactory = () => Task.FromResult(DatabaseConstants.FIREBASE_AUTH)
                 }
             );
+
+
         }
 
         /// <summary>

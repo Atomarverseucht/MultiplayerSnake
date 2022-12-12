@@ -92,9 +92,7 @@ namespace MultiplayerSnake
             this.firebase = new Firebase();
 
 
-            Console.WriteLine(this.firebase.queryOnce<string>(DatabaseConstants.KEY_VERSION));
             int databaseVersion = Int32.Parse(this.firebase.queryOnce<string>(DatabaseConstants.KEY_VERSION));
-            Console.WriteLine(databaseVersion);
             if (databaseVersion > DatabaseConstants.CLIENT_VERSION)
             {
                 MessageBox.Show("Your client is outdated. Please update your client to the newest version.", "Error");
@@ -108,6 +106,7 @@ namespace MultiplayerSnake
                 DialogResult res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
                 name = InputBox.ResultValue;
                 paintBarChart(lbSidebar.CreateGraphics());
+                return;
             }
             Application.Exit();
         }
