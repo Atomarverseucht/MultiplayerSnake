@@ -130,8 +130,11 @@ namespace MultiplayerSnake
                 case "Cancel":
                     DialogRes = DialogResult.Cancel;
                     break;
-                default:
+                case "OK":
                     DialogRes = DialogResult.OK;
+                    break;
+                default:
+                    DialogRes = DialogResult.None;
                     break;
             }
             frm.Close();

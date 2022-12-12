@@ -11,12 +11,10 @@ namespace MultiplayerSnake
         // class to controll going in fullscreen with F11
         private FullScreen fullScreen;
 
-        // set the coordinate system resolution (always 16:9)
-        private const int snakeboardMaxX = 1280;
-        private const int snakeboardMaxY = 720;
-
         // the database
         private Firebase firebase;
+
+        private string name;
 
         public MainForm()
         {
@@ -45,11 +43,11 @@ namespace MultiplayerSnake
             int height75Percent = 3 * control.Size.Height / 4;
 
             // calculate aspect ratio
-            double aspectRatio = (double)snakeboardMaxX / snakeboardMaxY;
+            double aspectRatio = (double)Constants.SNAKEBOARD_MAX_X / Constants.SNAKEBOARD_MAX_Y;
 
             // only allow the smallest width, to be full size
-            double widthMax = (double)snakeboardMaxX / width50Percent;
-            double heightMax = (double)snakeboardMaxY / height75Percent;
+            double widthMax = (double)Constants.SNAKEBOARD_MAX_X / width50Percent;
+            double heightMax = (double)Constants.SNAKEBOARD_MAX_Y / height75Percent;
 
             // the other size (which is too big to fit on the monitor) will shrink,
             // but it will also consider the aspect ratio
@@ -84,31 +82,26 @@ namespace MultiplayerSnake
             pbGame.BackColor = Color.Black;
         }
 
-        public string name; 
-
         private void MainForm_Load(object sender, EventArgs e)
         {
             // connect to database
             this.firebase = new Firebase();
 
+            // check database version
+            if (!this.firebase.checkVersion())
+            {
+                Application.Exit();
+            }
 
-            int databaseVersion = this.firebase.queryOnce<int>(DatabaseConstants.KEY_VERSION);
-            if (databaseVersion > DatabaseConstants.CLIENT_VERSION)
+            DialogResult res = DialogResult.None;
+            while (res == DialogResult.None)
             {
-                MessageBox.Show("Your client is outdated. Please update your client to the newest version.", "Error");
-            }
-            else if (databaseVersion < DatabaseConstants.CLIENT_VERSION)
-            {
-                MessageBox.Show("The database is outdated. Please wait for the database to update.", "Error");
-            }
-            else
-            {
-                DialogResult res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
+                res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
                 name = InputBox.ResultValue;
-                paintBarChart(lbSidebar.CreateGraphics());
-                return;
+                //if (name)
             }
-            Application.Exit();
+            paintBarChart(lbSidebar.CreateGraphics());
+            return;
         }
 
         public void paintBarChart(Graphics g)
