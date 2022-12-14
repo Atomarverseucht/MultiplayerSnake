@@ -146,8 +146,8 @@ namespace MultiplayerSnake
         }
         private static void frm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (DialogRes != null) { }
-            else DialogRes = DialogResult.None;
+          //  if (DialogRes != null) { }
+          //  else DialogRes = DialogResult.None;
         }
         private static PictureBox Picture(Icon icon)
         {

@@ -32,6 +32,7 @@
             this.lbStatus = new System.Windows.Forms.Label();
             this.lbSidebar = new System.Windows.Forms.Label();
             this.btnRetry = new System.Windows.Forms.Button();
+            this.panel1 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).BeginInit();
             this.SuspendLayout();
             // 
@@ -56,12 +57,13 @@
             // lbSidebar
             // 
             this.lbSidebar.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbSidebar.Location = new System.Drawing.Point(12, 63);
+            this.lbSidebar.Location = new System.Drawing.Point(1, 54);
             this.lbSidebar.Name = "lbSidebar";
             this.lbSidebar.Padding = new System.Windows.Forms.Padding(0, 35, 0, 0);
-            this.lbSidebar.Size = new System.Drawing.Size(197, 883);
+            this.lbSidebar.Size = new System.Drawing.Size(282, 864);
             this.lbSidebar.TabIndex = 3;
             this.lbSidebar.Text = "Online: 1/15\r\n\r\ntest: 23";
+            this.lbSidebar.Paint += new System.Windows.Forms.PaintEventHandler(this.LbSidebar_Paint);
             // 
             // btnRetry
             // 
@@ -74,11 +76,19 @@
             this.btnRetry.UseVisualStyleBackColor = true;
             this.btnRetry.Visible = false;
             // 
+            // panel1
+            // 
+            this.panel1.Location = new System.Drawing.Point(0, 54);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(228, 328);
+            this.panel1.TabIndex = 5;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(834, 461);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.btnRetry);
             this.Controls.Add(this.lbSidebar);
             this.Controls.Add(this.pbGame);
@@ -100,6 +110,7 @@
         private System.Windows.Forms.Label lbStatus;
         private System.Windows.Forms.Label lbSidebar;
         private System.Windows.Forms.Button btnRetry;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 

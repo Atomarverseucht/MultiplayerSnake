@@ -105,16 +105,40 @@ namespace MultiplayerSnake
             {
                 DialogResult res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
                 name = InputBox.ResultValue;
-                paintBarChart(lbSidebar.CreateGraphics());
+                
                 return;
             }
             Application.Exit();
         }
 
-        public void paintBarChart(Graphics g)
+        public void drawBarChart(Graphics g)
         {
-            int maxScore = 35;
-            g.DrawRectangle(Pens.Black, 20,100,150,150);
+            SolidBrush blue = new SolidBrush(Color.Blue);
+            int score = 100;
+            int score2 = 50;
+            g.FillRectangle(blue, 0,50,calculateBar(score),30);
+            g.DrawString(name,new Font("Arial",12),Brushes.LightGray,10,55);
+            g.FillRectangle(Brushes.Red, 0, 100, calculateBar(score2), 30);
+
+
+        }
+
+        int firstScore;
+        public int calculateBar(int score)
+        {
+            if (firstScore < score)
+            {
+                firstScore = score;
+            }
+            
+            return score * 200/firstScore;
+        }
+
+       
+
+        private void LbSidebar_Paint(object sender, PaintEventArgs e)
+        {
+            drawBarChart(panel1.CreateGraphics());
         }
     }
 }
