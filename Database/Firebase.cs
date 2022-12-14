@@ -1,7 +1,10 @@
 ﻿using Firebase.Database;
+using Firebase.Database.Query;
+using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,7 +15,18 @@ namespace MultiplayerSnake
         // the database client
         private FirebaseClient client;
 
-        public bool firstInitOtherSnakes = false;
+        public List<FoodData> foods = new List<FoodData>();
+
+        public string name = "";
+
+        public string snake_color = "";
+
+        public Dictionary<string, PlayerData> otherSnakes = new Dictionary<string, PlayerData>();
+
+        public Dictionary<string, PlayerData> allSnakes = new Dictionary<string, PlayerData>();
+
+        public int forcedFoodLevel = -1;
+
 
         public Firebase()
         {
@@ -49,6 +63,7 @@ namespace MultiplayerSnake
         public bool checkVersion()
         {
             int databaseVersion = this.queryOnce<int>(Constants.FIREBASE_KEY_VERSION);
+            Console.WriteLine(databaseVersion);
             if (databaseVersion > Constants.CLIENT_VERSION)
             {
                 MessageBox.Show("Your client is outdated. Please update your client to the newest version.", "Error");
@@ -64,52 +79,55 @@ namespace MultiplayerSnake
         }
 
         // set the listeners for firebase
-        public void setFireBaseListeners()
+        public void registerFireBaseListeners()
         {
+            ManualResetEvent oSignalEvent = new ManualResetEvent(false);
+
             // value of foods changed, update it
-            this.client.Child("snake/foods").AsObservable<Dictionary<string, string>[]>().Subscribe((Dictionary<string, string>[] data) =>
+            this.client.Child("snake/foods").AsObservable<List<FoodData>>().Subscribe(snapshot =>
             {
-                this.foods = data == null ? [] : data;
-            }
-            );
-            firebase.database().ref ("snake/foods").on("value", (snapshot) => {
-                data = snapshot.val();
-                foods = data == null?[] : data;
+                this.foods = snapshot.Object == null
+                ? new List<FoodData>()
+                : snapshot.Object;
+                oSignalEvent.Set();
             });
+            oSignalEvent.WaitOne();
 
             // the food spawn type is forced by database
-            firebase.database().ref ("snake/forcedFoodLevel").on("value", (snapshot) => {
-                data = snapshot.val();
-                forcedFoodLevel = data == null ? -1 : data;
+            this.client.Child("snake/forcedFoodLevel").AsObservable<int>().Subscribe(snapshot =>
+            {
+                this.forcedFoodLevel = snapshot.Object;
+                oSignalEvent.Set();
             });
+            oSignalEvent.WaitOne();
 
             // listen for other snake(s) changes
-            firebase.database().ref ("snake/players").on("value", (snapshot) => {
-                data = snapshot.val();
+            TaskCompletionSource<bool> tcs = null;
+            this.client.Child("snake/players").AsObservable<Dictionary<string, PlayerData>>().Subscribe(snapshot =>
+            {
+                Dictionary<string, PlayerData> data = snapshot.Object;
+                
+                
                 if (data == null)
                 {
-                    this.firstInitOtherSnakes = true;
+                    oSignalEvent.Set();
                     return;
                 }
 
-                var newArray = [];
-      // we ignore ourself, so we have to put it in a new array, without ourself
-      for (var playerName in data)
-                {
-                    if (playerName == name)
-                    {
-                        // update our own color
-                        my_snake_col = data[playerName]["color"];
-                        continue;
-                    }
-                    newArray[playerName] = data[playerName];
-                }
+                // set our own color
+                snake_color = data[this.name].color;
 
-                otherSnakes = newArray;
-                // used to count online (registered) players
-                allSnakes = data;
-                this.firstInitOtherSnakes = true;
+                // update all snakes (used to count online (registered) players)
+                this.allSnakes = data;
+
+                // we need to have a seperate dict with only other players
+                this.otherSnakes = new Dictionary<string, PlayerData>(data);
+                // we ignore ourself
+                this.otherSnakes.Remove(this.name);
+
+                oSignalEvent.Set();
             });
+            oSignalEvent.WaitOne();
         }
     }
 }

@@ -24,7 +24,7 @@ namespace MultiplayerSnake.Database
         /// </summary>
         public static FirebaseOptions FIREBASE_CONFIG = new FirebaseOptions
         {
-            AuthTokenAsyncFactory = () => Task.FromResult(Constants.FIREBASE_AUTH)
+            AuthTokenAsyncFactory = () => Task.FromResult(FIREBASE_AUTH)
         };
 
         /// <summary>
@@ -40,8 +40,8 @@ namespace MultiplayerSnake.Database
         /// <summary>
         /// All snake colors available
         /// </summary>
-        public const string[] COLORS = ["Aqua", "Yellow", "Red", "Black", "White", "DeepPink", "LawnGreen", "Orange",
-            "SaddleBrown", "OrangeRed", "DarkViolet", "Gold", "Indigo", "Silver", "DarkGreen"];
+        public static readonly string[] COLORS = {"Aqua", "Yellow", "Red", "Black", "White", "DeepPink", "LawnGreen", "Orange",
+            "SaddleBrown", "OrangeRed", "DarkViolet", "Gold", "Indigo", "Silver", "DarkGreen" };
 
         /// <summary>
         /// the delay between snake updates in ms
@@ -62,7 +62,7 @@ namespace MultiplayerSnake.Database
         /// <summary>
         /// max player count (currently, set to the amount of colors, available)
         /// </summary>
-        public static int MAX_PLAYERS = COLORS.Length;
+        public static readonly int MAX_PLAYERS = COLORS.Length;
 
         // set the coordinate system resolution (always 16:9)
         public const int SNAKEBOARD_MAX_X = 1280;

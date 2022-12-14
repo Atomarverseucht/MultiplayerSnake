@@ -93,12 +93,14 @@ namespace MultiplayerSnake
                 Application.Exit();
             }
 
+            this.firebase.registerFireBaseListeners();
+
             DialogResult res = DialogResult.None;
             while (res == DialogResult.None)
             {
                 res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
                 name = InputBox.ResultValue;
-                //if (name)
+                
             }
             paintBarChart(lbSidebar.CreateGraphics());
             return;
