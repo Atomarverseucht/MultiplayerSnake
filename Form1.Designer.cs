@@ -34,6 +34,7 @@
             this.btnRetry = new System.Windows.Forms.Button();
             this.pnSidebar = new System.Windows.Forms.Panel();
             this.tmUpdate = new System.Windows.Forms.Timer(this.components);
+            this.lbUhr = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).BeginInit();
             this.SuspendLayout();
             // 
@@ -77,11 +78,21 @@
             // 
             this.tmUpdate.Tick += new System.EventHandler(this.tmUpdate_Tick);
             // 
+            // lbUhr
+            // 
+            this.lbUhr.AutoSize = true;
+            this.lbUhr.Location = new System.Drawing.Point(711, 26);
+            this.lbUhr.Name = "lbUhr";
+            this.lbUhr.Size = new System.Drawing.Size(34, 13);
+            this.lbUhr.TabIndex = 6;
+            this.lbUhr.Text = "__:__";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(834, 461);
+            this.Controls.Add(this.lbUhr);
             this.Controls.Add(this.pnSidebar);
             this.Controls.Add(this.btnRetry);
             this.Controls.Add(this.pbGame);
@@ -104,6 +115,7 @@
         private System.Windows.Forms.Button btnRetry;
         private System.Windows.Forms.Panel pnSidebar;
         private System.Windows.Forms.Timer tmUpdate;
+        private System.Windows.Forms.Label lbUhr;
     }
 }
 
