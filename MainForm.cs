@@ -108,7 +108,7 @@ namespace MultiplayerSnake
         /// Update bar graph
         /// </summary>
         /// <param Grafik="g"></param>
-        public void updateBarChart(Graphics g)
+       /* public void updateBarChart(Graphics g)
         {
             List<int> scores = new List<int>();
            
@@ -139,11 +139,11 @@ namespace MultiplayerSnake
             
             return score * 270 / firstScore;
         }
-
+        */
         // Timer
         private void tmUpdate_Tick(object sender, EventArgs e)
         {
-            updateBarChart(pnSidebar.CreateGraphics());
+            //updateBarChart(pnSidebar.CreateGraphics());
         }
     }
 }
