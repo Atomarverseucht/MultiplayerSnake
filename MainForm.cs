@@ -1,7 +1,9 @@
 ﻿using MultiplayerSnake.Database;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace MultiplayerSnake
 {
@@ -108,42 +110,40 @@ namespace MultiplayerSnake
         /// Update bar graph
         /// </summary>
         /// <param Grafik="g"></param>
-       /* public void updateBarChart(Graphics g)
+        public void updateBarChart(Graphics g)
         {
-            List<int> scores = new List<int>();
-           
-            
+            List<int> scores = new List<int>() {2,46,42,79 };
+            scores.Add(200);
+            scores.Add(167);
+            scores.Sort();
+            scores.Reverse();
+            firstScore = scores[0];
          
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < scores.Count(); i++)
             {
-                drawBarChart();
+                drawBarChart(g, scores[i], 40+i*50, name, Brushes.Blue);
             }
 
         }
 
         // Methoden für "updateBarGraph(g)"
 
-        public void drawBarChart(Graphics g, int score, int yposition, Brush b)
+        public void drawBarChart(Graphics g, int score, int yposition, string p_name, Brush b)
         {
             g.FillRectangle(b, 0, yposition, calculateBar(score), 30);
-            g.DrawString(name, new Font("Arial", 12), Brushes.LightGray, 10, yposition+5);
+            g.DrawString(p_name, new Font("Arial", 12), Brushes.LightGray, 10, yposition+5);
         }
 
         int firstScore;
         public int calculateBar(int score)
         {
-            if (firstScore < score)
-            {
-                firstScore = score;
-            }
-            
-            return score * 270 / firstScore;
+            return score * 200 / firstScore;
         }
-        */
+        
         // Timer
         private void tmUpdate_Tick(object sender, EventArgs e)
         {
-            //updateBarChart(pnSidebar.CreateGraphics());
+            updateBarChart(pnSidebar.CreateGraphics());
         }
     }
 }
