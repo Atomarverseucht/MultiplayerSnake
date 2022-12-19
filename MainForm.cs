@@ -103,17 +103,30 @@ namespace MultiplayerSnake
             }
             return;
         }
-
-        public void drawBarChart(Graphics g)
+        
+        /// <summary>
+        /// Update bar graph
+        /// </summary>
+        /// <param Grafik="g"></param>
+        public void updateBarChart(Graphics g)
         {
-            SolidBrush blue = new SolidBrush(Color.Blue);
-            int score = 100;
-            int score2 = 50;
-            g.FillRectangle(blue, 0,50,calculateBar(score),30);
-            g.DrawString(name,new Font("Arial",12),Brushes.LightGray,10,55);
-            g.FillRectangle(Brushes.Red, 0, 100, calculateBar(score2), 30);
+            List<int> scores = new List<int>();
+           
+            
+         
+            for (int i = 0; i < length; i++)
+            {
+                drawBarChart();
+            }
 
+        }
 
+        // Methoden für "updateBarGraph(g)"
+
+        public void drawBarChart(Graphics g, int score, int yposition, Brush b)
+        {
+            g.FillRectangle(b, 0, yposition, calculateBar(score), 30);
+            g.DrawString(name, new Font("Arial", 12), Brushes.LightGray, 10, yposition+5);
         }
 
         int firstScore;
@@ -124,14 +137,13 @@ namespace MultiplayerSnake
                 firstScore = score;
             }
             
-            return score * 200/firstScore;
+            return score * 270 / firstScore;
         }
 
-       
-
-        private void LbSidebar_Paint(object sender, PaintEventArgs e)
+        // Timer
+        private void tmUpdate_Tick(object sender, EventArgs e)
         {
-            drawBarChart(panel1.CreateGraphics());
+            updateBarChart(pnSidebar.CreateGraphics());
         }
     }
 }
