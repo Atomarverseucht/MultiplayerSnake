@@ -75,7 +75,6 @@
             // 
             // tmUpdate
             // 
-            this.tmUpdate.Enabled = true;
             this.tmUpdate.Tick += new System.EventHandler(this.tmUpdate_Tick);
             // 
             // MainForm

@@ -101,15 +101,15 @@ namespace MultiplayerSnake
             {
                 res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
                 name = InputBox.ResultValue;
-
+                tmUpdate.Enabled = true;
             }
             return;
         }
         
         /// <summary>
-        /// Update bar graph
+        /// Updates bar chart
         /// </summary>
-        /// <param Grafik="g"></param>
+        /// <param Grafic="g"></param>
         public void updateBarChart(Graphics g)
         {
             List<int> scores = new List<int>() {2,46,42,79 };
@@ -125,13 +125,23 @@ namespace MultiplayerSnake
             }
 
         }
-
-        // Methoden für "updateBarGraph(g)"
+        
+        // Methods for "updateBarGraph(g)"
 
         public void drawBarChart(Graphics g, int score, int yposition, string p_name, Brush b)
         {
             g.FillRectangle(b, 0, yposition, calculateBar(score), 30);
-            g.DrawString(p_name, new Font("Arial", 12), Brushes.LightGray, 10, yposition+5);
+
+            //writing
+            if (calculateBar(score) < 10+p_name.Length*5)
+            {
+                g.DrawString(p_name, new Font("Arial", 12), Brushes.Black, 10, yposition + 5);
+            }
+            else
+            {
+                g.DrawString(p_name, new Font("Arial", 12), Brushes.White, 10, yposition+5);
+            }
+           
         }
 
         int firstScore;
