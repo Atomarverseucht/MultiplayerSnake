@@ -1,6 +1,8 @@
 ﻿using MultiplayerSnake.Database;
 using System;
 using System.Drawing;
+using System.Net;
+using System.Net.Http;
 using System.Windows.Forms;
 
 namespace MultiplayerSnake
@@ -86,21 +88,22 @@ namespace MultiplayerSnake
             // connect to database
             this.firebase = new Firebase();
 
+            
+
             // check database version
             if (!this.firebase.checkVersion())
             {
                 Application.Exit();
             }
+            this.firebase.registerFireBaseListeners();
 
-            //this.firebase.registerFireBaseListeners();
-
-            DialogResult res = DialogResult.None;
-            while (res == DialogResult.None)
+            DialogResult res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
+            if (res == DialogResult.None)
             {
-                res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
-                name = InputBox.ResultValue;
-
+                Application.Exit();
             }
+
+            name = InputBox.ResultValue;
             return;
         }
 

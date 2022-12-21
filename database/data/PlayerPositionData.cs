@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace MultiplayerSnake.database.data
 {
-    public class FoodData
+    public class PlayerPositionData
     {
-        public int level;
-        public int x;
-        public int y;
+        public int x { get; set; }
+
+        public int y { get; set; }
     }
 }
