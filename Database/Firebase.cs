@@ -80,7 +80,6 @@ namespace MultiplayerSnake
         /// <returns></returns>
         private bool checkVersion(int dbVersion)
         {
-            Console.WriteLine(dbVersion);
             if (dbVersion > Constants.CLIENT_VERSION)
             {
                 MessageBox.Show("Your client is outdated. Please update your client to the newest version.", "Error");
