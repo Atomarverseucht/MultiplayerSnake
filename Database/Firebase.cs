@@ -1,4 +1,5 @@
 ﻿using Firebase.Database;
+using Firebase.Database.Streaming;
 using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
 using System;
@@ -16,16 +17,22 @@ namespace MultiplayerSnake
         // the database client
         private FirebaseClient client;
 
+        // food positions
         public ConcurrentDictionary<int, FoodsData> foods = new ConcurrentDictionary<int, FoodsData>();
 
+        // the player name
         public string name = "";
 
-        public string snake_color = "";
+        // our snake color
+        public string my_snake_col = "";
 
+        // the other players
         public ConcurrentDictionary<string, PlayerData> otherSnakes = new ConcurrentDictionary<string, PlayerData>();
 
+        // used to count online (registered) players
         public ConcurrentDictionary<string, PlayerData> allSnakes = new ConcurrentDictionary<string, PlayerData>();
 
+        // if not negative, only this type of food will spawn
         public int forcedFoodLevel = -1;
 
 
@@ -96,7 +103,19 @@ namespace MultiplayerSnake
             // value of foods changed, update it
             this.client.Child("snake/foods").AsObservable<FoodsData>((sender, e) => Console.WriteLine(e.Exception), "").Subscribe(snapshot =>
             {
-                this.foods.AddOrUpdate(int.Parse(snapshot.Key), snapshot.Object, (key, oldValue) => snapshot.Object);
+                int key = int.Parse(snapshot.Key);
+
+                // check if the food got deleted
+                if (snapshot.EventType == FirebaseEventType.Delete)
+                {
+                    // remove the food from the list
+                    this.foods.TryRemove(key, out var ignored);
+                }
+                else
+                {
+                    // add the food to the list
+                    this.foods.AddOrUpdate(key, snapshot.Object, (oldKey, oldValue) => snapshot.Object);
+                }
 
                 // if first run, signal main thread to continue
                 oSignalEvent.Set();
@@ -126,11 +145,17 @@ namespace MultiplayerSnake
                 string key = snapshot.Key;
                 PlayerData playerData = snapshot.Object;
 
+                // TODO debug remove
                 if (playerData.pos != null && playerData.pos.Any())
                     Console.WriteLine(playerData.pos.ElementAt(0).x);
 
-                if (string.IsNullOrWhiteSpace(key) || playerData == null)
+                // check if we even have player data
+                if (snapshot.EventType == FirebaseEventType.Delete)
                 {
+                    // remove the player
+                    this.allSnakes.TryRemove(key, out var ignored1);
+                    this.otherSnakes.TryRemove(key, out var ignored2);
+
                     oSignalEvent.Set();
                     return;
                 }
@@ -142,13 +167,13 @@ namespace MultiplayerSnake
                 if (key == this.name)
                 {
                     // then we can set our own color
-                    this.snake_color = this.allSnakes[this.name].color;
+                    this.my_snake_col = this.allSnakes[this.name].color;
                 }
 
                 // we need to have a seperate dict with only other players
                 this.otherSnakes = new ConcurrentDictionary<string, PlayerData>(this.allSnakes);
                 // we ignore ourself
-                this.otherSnakes.TryRemove(this.name, out var ignored);
+                this.otherSnakes.TryRemove(this.name, out var ignored3);
 
                 // if first run, signal main thread to continue
                 oSignalEvent.Set();

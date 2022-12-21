@@ -8,8 +8,19 @@ namespace MultiplayerSnake.database.data
 {
     public class FoodsData
     {
+        /// <summary>
+        /// The level of the food
+        /// </summary>
         public int level { get; set; }
+
+        /// <summary>
+        /// The x position of the food
+        /// </summary>
         public int x { get; set; }
+
+        /// <summary>
+        /// The y position of the food
+        /// </summary>
         public int y { get; set; }
     }
 }
