@@ -1,9 +1,11 @@
 ﻿using MultiplayerSnake.Database;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Net;
 using System.Net.Http;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace MultiplayerSnake
 {
@@ -106,35 +108,57 @@ namespace MultiplayerSnake
             name = InputBox.ResultValue;
             return;
         }
-
-        public void drawBarChart(Graphics g)
+        
+        /// <summary>
+        /// Updates bar chart
+        /// </summary>
+        /// <param Grafic="g"></param>
+        public void updateBarChart(Graphics g)
         {
-            SolidBrush blue = new SolidBrush(Color.Blue);
-            int score = 100;
-            int score2 = 50;
-            g.FillRectangle(blue, 0,50,calculateBar(score),30);
-            g.DrawString(name,new Font("Arial",12),Brushes.LightGray,10,55);
-            g.FillRectangle(Brushes.Red, 0, 100, calculateBar(score2), 30);
+            List<int> scores = new List<int>() {2,46,42,79 };
+            scores.Add(200);
+            scores.Add(167);
+            scores.Sort();
+            scores.Reverse();
+            firstScore = scores[0];
+         
+            for (int i = 0; i < scores.Count(); i++)
+            {
+                drawBarChart(g, scores[i], 40+i*50, name, Brushes.Blue);
+            }
 
+        }
+        
+        // Methods for "updateBarGraph(g)"
 
+        public void drawBarChart(Graphics g, int score, int yposition, string p_name, Brush b)
+        {
+            g.FillRectangle(b, 0, yposition, calculateBar(score), 30);
+
+            //writing
+            if (calculateBar(score) < 10+p_name.Length*5)
+            {
+                g.DrawString(p_name, new Font("Arial", 12), Brushes.Black, 10, yposition + 5);
+            }
+            else
+            {
+                g.DrawString(p_name, new Font("Arial", 12), Brushes.White, 10, yposition+5);
+            }
+           
         }
 
         int firstScore;
         public int calculateBar(int score)
         {
-            if (firstScore < score)
-            {
-                firstScore = score;
-            }
-            
-            return score * 200/firstScore;
+            return score * 200 / firstScore;
         }
-
-       
-
-        private void LbSidebar_Paint(object sender, PaintEventArgs e)
+        
+        // Timer
+        private void tmUpdate_Tick(object sender, EventArgs e)
         {
-            drawBarChart(panel1.CreateGraphics());
+            updateBarChart(pnSidebar.CreateGraphics());
+            lbUhr.Text = DateTime.Now.Date.ToString();
+            
         }
     }
 }
