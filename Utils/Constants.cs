@@ -1,5 +1,4 @@
 ﻿using Firebase.Database;
-using System;
 using System.Threading.Tasks;
 
 namespace MultiplayerSnake.Database
