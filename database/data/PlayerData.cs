@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MultiplayerSnake.database.data
 {
-    class PlayerData
+    public class PlayerData
     {
         /// <summary>
         /// color of the player as HTML color name

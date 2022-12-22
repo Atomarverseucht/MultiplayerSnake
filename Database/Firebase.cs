@@ -3,7 +3,9 @@ using Firebase.Database.Query;
 using Firebase.Database.Streaming;
 using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
+using MultiplayerSnake.game;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -15,13 +17,16 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace MultiplayerSnake
 {
-    class Firebase
+    public class Firebase
     {
+        // access to main form
+        private MainForm mainForm;
+
+        // access to the manger class for foods
+        private FoodManager foodManger;
+
         // the database client
         private FirebaseClient client;
-
-        // food positions
-        public ConcurrentDictionary<int, FoodsData> foods = new ConcurrentDictionary<int, FoodsData>();
 
         // the player name
         public string name = "";
@@ -39,11 +44,13 @@ namespace MultiplayerSnake
         public int forcedFoodLevel = -1;
 
 
-        public Firebase()
+        public Firebase(MainForm mainForm)
         {
             this.client = new FirebaseClient(Constants.FIREBASE_URL, Constants.FIREBASE_CONFIG);
 
+            this.mainForm = mainForm;
 
+            this.foodManger = this.mainForm.foodManager;
         }
 
         /// <summary>
@@ -90,12 +97,32 @@ namespace MultiplayerSnake
         }
 
         /// <summary>
+        /// Delete data synchronous with the main thread from the database.
+        /// </summary>
+        /// <param name="key">the key to delete the data from</param>
+        /// <returns>if the data was deleted successfully</returns>
+        public bool delete(string key)
+        {
+            try
+            {
+                var task = this.client.Child("snake/" + key).DeleteAsync();
+                Task.WaitAll(task);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Querys the database for the version and compares it with the clients version.
         /// </summary>
         /// <returns>true if the version is up to date</returns>
         public bool checkVersion()
         {
-            return this.checkVersion(this.queryOnce<int>(Constants.FIREBASE_KEY_VERSION));
+            return this.checkVersion(this.queryOnce<int>(Constants.FIREBASE_VERSION_KEY));
         }
 
         /// <summary>
@@ -119,6 +146,14 @@ namespace MultiplayerSnake
             return true;
         }
 
+        /// <summary>
+        /// save the foods data to database
+        /// </summary>
+        public void updateFoods()
+        {
+            this.put(Constants.FIREBASE_FOODS_KEY, this.foodManger.foods);
+        }
+
         // set the listeners for firebase
         public void registerFireBaseListeners()
         {
@@ -139,15 +174,15 @@ namespace MultiplayerSnake
                 if (snapshot.EventType == FirebaseEventType.Delete)
                 {
                     // remove the food from the list
-                    this.foods.TryRemove(key, out var ignored);
+                    this.foodManger.foods.TryRemove(key, out var ignored);
                 }
                 else
                 {
                     // add the food to the list
-                    this.foods.AddOrUpdate(key, snapshot.Object, (oldKey, oldValue) => snapshot.Object);
+                    this.foodManger.foods.AddOrUpdate(key, snapshot.Object, (oldKey, oldValue) => snapshot.Object);
                 }
 
-                Console.WriteLine(JsonConvert.SerializeObject(this.foods));
+                Console.WriteLine(JsonConvert.SerializeObject(this.foodManger.foods));
 
                 // if first run, signal main thread to continue
                 oSignalEvent.Set();
@@ -292,6 +327,17 @@ namespace MultiplayerSnake
                     this.name = "";
                 }
             }
+
+            // name set successfully, we can run the game now  and we need to save the name
+            // in a separate key to get access to write our data later, this will also restrict
+            // the access to this entry only for us
+            this.put(Constants.FIREBASE_PLAYER_VERIFY_NAME_KEY.Replace("%name%", this.name), this.name);
+
+            // if player disconnect (closes window), remove data
+            Application.ApplicationExit += (sender, e) =>
+            {
+                this.delete(Constants.FIREBASE_PLAYER_VERIFY_NAME_KEY.Replace("%name%", this.name));
+            };
         }
     }
 }

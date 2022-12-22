@@ -6,16 +6,20 @@ using System.Net;
 using System.Net.Http;
 using System.Windows.Forms;
 using System.Linq;
+using MultiplayerSnake.game;
 
 namespace MultiplayerSnake
 {
     public partial class MainForm : Form
     {
-        // class to controll going in fullscreen with F11
+        // class to control going in fullscreen with F11
         private FullScreen fullScreen;
 
+        // class containing everything about food
+        public FoodManager foodManager;
+
         // the database
-        private Firebase firebase;
+        public Firebase firebase;
 
         public MainForm()
         {
@@ -85,16 +89,25 @@ namespace MultiplayerSnake
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            // init the food manager class
+            this.foodManager = new FoodManager(this);
+
             // connect to database
-            this.firebase = new Firebase();
+            this.firebase = new Firebase(this);
+
+            this.foodManager.init();
 
             // register the firebase listeners. this also performs a version check
             this.firebase.registerFireBaseListeners();
             
+            // check if the game is already full
             this.firebase.checkMaxPlayerCount();
 
             // let the user decide, which name he wants to use
             this.firebase.chooseName();
+
+            // now we need to check, if we have to add foods
+            this.foodManager.checkFoodsAvailable();
             
             tmUpdate.Start();
             return;
@@ -139,6 +152,7 @@ namespace MultiplayerSnake
         }
 
         int firstScore;
+
         public int calculateBar(int score)
         {
             return score * 200 / firstScore;

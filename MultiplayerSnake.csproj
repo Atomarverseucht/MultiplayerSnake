@@ -64,6 +64,7 @@
     <Compile Include="database\data\PlayerData.cs" />
     <Compile Include="database\data\PlayerPositionData.cs" />
     <Compile Include="database\data\VariablesData.cs" />
+    <Compile Include="game\FoodManager.cs" />
     <Compile Include="utils\Constants.cs" />
     <Compile Include="database\Firebase.cs" />
     <Compile Include="FullScreen.cs" />

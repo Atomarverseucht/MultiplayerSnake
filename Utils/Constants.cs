@@ -34,9 +34,30 @@ namespace MultiplayerSnake.Database
         /// <summary>
         /// the database key for the version
         /// </summary>
-        public const string FIREBASE_KEY_VERSION = "variables/version";
+        public const string FIREBASE_VERSION_KEY = "variables/version";
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string FIREBASE_FOODS_KEY = "foods";
+
+        /// <summary>
+        /// the database key for the root of a player's data<br/>
+        /// %name% must be replaced by the player name
+        /// </summary>
+        public const string FIREBASE_PLAYER_KEY = "players/%player%";
+
+        /// <summary>
+        /// the database key for the player color.<br/>
+        /// %name% must be replaced by the player name to get the color from
+        /// </summary>
         public const string FIREBASE_PLAYER_COLOR_KEY = "players/%name%/color";
+
+        /// <summary>
+        /// the database key for the player verify system.<br/>
+        /// %name% must be replaced by the player name to verify
+        /// </summary>
+        public const string FIREBASE_PLAYER_VERIFY_NAME_KEY = "players/%name%/verifyName";
 
         /// <summary>
         /// All snake colors available
