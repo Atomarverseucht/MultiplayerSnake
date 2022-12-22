@@ -3,6 +3,7 @@ using Firebase.Database.Query;
 using Firebase.Database.Streaming;
 using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
+using MultiplayerSnake.utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -11,7 +12,6 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace MultiplayerSnake
 {
@@ -292,6 +292,40 @@ namespace MultiplayerSnake
                     this.name = "";
                 }
             }
+        }
+
+        public string getRandomColor()
+        {
+            string[] unusedColors = getUnusedColors();
+            string color = unusedColors[Utils.RANDOM.Next(0, unusedColors.Length)];
+            return color;
+        }
+
+        public string[] getUnusedColors()
+        {
+            string[] usedColors = new string[] {};
+            string[] unusedColors = new string[] {};
+            int i = 0;
+            foreach (PlayerData otherSnake in otherSnakes.Values)
+            {
+                if(otherSnake == null || otherSnake.color == null)
+                {
+                    continue;
+                }
+                usedColors[i++] = otherSnake.color;
+                i++;
+            }
+
+            i = 0;
+            foreach (string colorName in Constants.COLORS)
+            {
+                if (!usedColors.Contains(colorName))
+                {
+                    unusedColors[i] = colorName;
+                    i++;
+                }
+            }
+            return unusedColors;
         }
     }
 }
