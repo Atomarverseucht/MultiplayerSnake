@@ -104,7 +104,7 @@ namespace MultiplayerSnake
             {
                 Application.Exit();
             }
-
+            tmUpdate.Start();
             name = InputBox.ResultValue;
             return;
         }
@@ -160,5 +160,6 @@ namespace MultiplayerSnake
             lbUhr.Text = DateTime.Now.Date.ToString();
             
         }
+
     }
 }
