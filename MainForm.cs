@@ -104,7 +104,7 @@ namespace MultiplayerSnake
             {
                 Application.Exit();
             }
-
+            tmUpdate.Start();
             name = InputBox.ResultValue;
             return;
         }
