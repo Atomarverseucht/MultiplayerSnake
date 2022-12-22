@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MultiplayerSnake.Utils
+namespace MultiplayerSnake.utils
 {
-    class Utils
+    public class Utils
     {
-
+        public static readonly Random RANDOM = new Random();
     }
 }
