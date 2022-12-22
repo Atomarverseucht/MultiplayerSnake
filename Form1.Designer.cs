@@ -83,9 +83,8 @@
             this.lbUhr.AutoSize = true;
             this.lbUhr.Location = new System.Drawing.Point(711, 26);
             this.lbUhr.Name = "lbUhr";
-            this.lbUhr.Size = new System.Drawing.Size(34, 13);
+            this.lbUhr.Size = new System.Drawing.Size(0, 13);
             this.lbUhr.TabIndex = 6;
-            this.lbUhr.Text = "__:__";
             // 
             // MainForm
             // 

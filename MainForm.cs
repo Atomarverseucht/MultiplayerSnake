@@ -148,7 +148,6 @@ namespace MultiplayerSnake
         private void tmUpdate_Tick(object sender, EventArgs e)
         {
             updateBarChart(pnSidebar.CreateGraphics());
-            lbUhr.Text = DateTime.Now.Date.ToString();
             
         }
 
