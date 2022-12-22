@@ -2,6 +2,7 @@
 using Firebase.Database.Streaming;
 using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -102,6 +103,12 @@ namespace MultiplayerSnake
             // value of foods changed, update it
             this.client.Child("snake/foods").AsObservable<FoodsData>((sender, e) => Console.WriteLine(e.Exception), "").Subscribe(snapshot =>
             {
+                if (string.IsNullOrWhiteSpace(snapshot.Key))
+                {
+                    // if first run, signal main thread to continue
+                    oSignalEvent.Set();
+                    return;
+                }
                 int key = int.Parse(snapshot.Key);
 
                 // check if the food got deleted
@@ -115,6 +122,8 @@ namespace MultiplayerSnake
                     // add the food to the list
                     this.foods.AddOrUpdate(key, snapshot.Object, (oldKey, oldValue) => snapshot.Object);
                 }
+
+                Console.WriteLine(JsonConvert.SerializeObject(this.foods));
 
                 // if first run, signal main thread to continue
                 oSignalEvent.Set();
@@ -141,15 +150,18 @@ namespace MultiplayerSnake
             // listen for other snake(s) changes
             this.client.Child("snake/players").AsObservable<PlayerData>().Subscribe(snapshot =>
             {
+                if (string.IsNullOrWhiteSpace(snapshot.Key))
+                {
+                    // if first run, signal main thread to continue
+                    oSignalEvent.Set();
+                    return;
+                }
+
                 string key = snapshot.Key;
                 PlayerData playerData = snapshot.Object;
 
-                // TODO debug remove
-                if (playerData.pos != null && playerData.pos.Any())
-                    Console.WriteLine(playerData.pos.ElementAt(0).x);
-
                 // check if we even have player data
-                if (snapshot.EventType == FirebaseEventType.Delete)
+                if (snapshot.EventType == FirebaseEventType.Delete || playerData == null)
                 {
                     // remove the player
                     this.allSnakes.TryRemove(key, out var ignored1);
@@ -158,6 +170,10 @@ namespace MultiplayerSnake
                     oSignalEvent.Set();
                     return;
                 }
+
+                // TODO debug remove
+                if (playerData.pos != null && playerData.pos.Any())
+                    Console.WriteLine(playerData.pos.ElementAt(0).x);
 
                 // update all snakes (used to count online (registered) players)
                 this.allSnakes[key] = playerData;
