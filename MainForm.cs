@@ -90,13 +90,7 @@ namespace MultiplayerSnake
             // connect to database
             this.firebase = new Firebase();
 
-            
-
-            // check database version
-            if (!this.firebase.checkVersion())
-            {
-                Application.Exit();
-            }
+            // register the firebase listeners. this also performs a version check
             this.firebase.registerFireBaseListeners();
 
             DialogResult res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
