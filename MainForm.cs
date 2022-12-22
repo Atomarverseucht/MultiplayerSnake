@@ -92,6 +92,8 @@ namespace MultiplayerSnake
 
             // register the firebase listeners. this also performs a version check
             this.firebase.registerFireBaseListeners();
+            
+            this.firebase.checkMaxPlayerCount();
 
             DialogResult res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
             if (res == DialogResult.None)

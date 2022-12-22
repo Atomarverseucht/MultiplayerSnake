@@ -195,5 +195,31 @@ namespace MultiplayerSnake
             });
             oSignalEvent.WaitOne();
         }
+        
+        public int getOnlinePlayers()
+        {
+            return this.allSnakes.Count;
+        }
+
+        public int getActivePlayers()
+        {
+            int count = 0;
+            foreach (PlayerData snake in this.allSnakes.Values)
+            {
+                if (snake.pos != null && snake.pos.Any())
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        public void checkMaxPlayerCount()
+        {
+            while (getOnlinePlayers() >= Constants.MAX_PLAYERS)
+            {
+                MessageBox.Show("The Game is full (15/15). Click the button to retry.", "Error");
+            }
+        }
     }
 }
