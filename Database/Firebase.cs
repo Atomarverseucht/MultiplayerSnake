@@ -220,13 +220,17 @@ namespace MultiplayerSnake
             oSignalEvent.WaitOne();
         }
 
-        // get the current online players
+        /// <summary>
+        /// Get the current online players.
+        /// </summary>
         public int getOnlinePlayers()
         {
             return this.allSnakes.Count;
         }
 
-        // get the players, currently playing
+        /// <summary>
+        /// Get the players, currently playing.
+        /// </summary>
         public int getActivePlayers()
         {
             int count = 0;
@@ -244,7 +248,9 @@ namespace MultiplayerSnake
             return count;
         }
 
-        // check if there are more players online, then max player count
+        /// <summary>
+        /// Check if there are more players online, then max player count.
+        /// </summary>
         public void checkMaxPlayerCount()
         {
             // max 15 players
