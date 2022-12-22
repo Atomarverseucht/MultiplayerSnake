@@ -1,4 +1,5 @@
 ﻿using Firebase.Database;
+using Firebase.Database.Query;
 using Firebase.Database.Streaming;
 using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
@@ -10,6 +11,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace MultiplayerSnake
 {
@@ -49,7 +51,7 @@ namespace MultiplayerSnake
         /// </summary>
         /// <typeparam name="T">The type of the data stored</typeparam>
         /// <param name="key">The key to query</param>
-        /// <returns></returns>
+        /// <returns>the requested data or null if it doesn't exist or an error occured</returns>
         public T queryOnce<T>(string key)
         {
             try
@@ -62,6 +64,28 @@ namespace MultiplayerSnake
             {
                 Console.Error.WriteLine(ex);
                 return default;
+            }
+        }
+
+        /// <summary>
+        /// Adds or overrides data synchronous with the main thread at a given location in the database.
+        /// </summary>
+        /// <typeparam name="T">The type of the data to update/set</typeparam>
+        /// <param name="key">the path to the data</param>
+        /// <param name="value">the data to update/set</param>
+        /// <returns>if the data was set successfully</returns>
+        public bool put<T>(string key, T value)
+        {
+            try
+            {
+                var task = this.client.Child("snake/" + key).PutAsync<T>(value);
+                Task.WaitAll(task);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                return false;
             }
         }
 
@@ -219,6 +243,40 @@ namespace MultiplayerSnake
             while (getOnlinePlayers() >= Constants.MAX_PLAYERS)
             {
                 MessageBox.Show("The Game is full (15/15). Click the button to retry.", "Error");
+            }
+        }
+
+        public void chooseName()
+        {
+            this.name = "";
+
+            while (this.name == "")
+            {
+                // prompt the player to enter a name
+                DialogResult res = InputBox.ShowDialog("Choose a player name:\n\n\".\", \"/\", \"#\", \"$\", \"[\", or \"]\" will be replaced by \"_\".", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
+                if (res == DialogResult.None)
+                {
+                    Application.Exit();
+                }
+                string tempName = InputBox.ResultValue;
+                this.name = tempName == null ? "" : tempName;
+
+                // replace unwanted symbols with underscore
+                this.name = this.name.Replace(".", "_").Replace("#", "_").Replace("$", "_").Replace("[", "_").Replace("]", "_").Replace("/", "_");
+
+                if (this.name.Length > 16)
+                {
+                    MessageBox.Show("This name is too long.", "Error");
+                    this.name = "";
+                    continue;
+                }
+
+                // the color value is set, so there must be a user, that has taken this name
+                if (this.queryOnce<string>(Constants.FIREBASE_PLAYER_COLOR_KEY.Replace("%name%", this.name)) != null)
+                {
+                    MessageBox.Show("Someone has already chosen this name.", "Error");
+                    this.name = "";
+                }
             }
         }
     }

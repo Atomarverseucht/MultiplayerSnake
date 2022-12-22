@@ -1,4 +1,5 @@
 ﻿using Firebase.Database;
+using System;
 using System.Threading.Tasks;
 
 namespace MultiplayerSnake.Database
@@ -34,6 +35,8 @@ namespace MultiplayerSnake.Database
         /// the database key for the version
         /// </summary>
         public const string FIREBASE_KEY_VERSION = "variables/version";
+
+        public const string FIREBASE_PLAYER_COLOR_KEY = "players/%name%/color";
 
         /// <summary>
         /// All snake colors available

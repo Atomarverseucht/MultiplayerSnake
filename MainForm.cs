@@ -17,8 +17,6 @@ namespace MultiplayerSnake
         // the database
         private Firebase firebase;
 
-        private string name;
-
         public MainForm()
         {
             InitializeComponent();
@@ -95,13 +93,10 @@ namespace MultiplayerSnake
             
             this.firebase.checkMaxPlayerCount();
 
-            DialogResult res = InputBox.ShowDialog("Type name", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
-            if (res == DialogResult.None)
-            {
-                Application.Exit();
-            }
+            // let the user decide, which name he wants to use
+            this.firebase.chooseName();
+            
             tmUpdate.Start();
-            name = InputBox.ResultValue;
             return;
         }
         
@@ -120,7 +115,7 @@ namespace MultiplayerSnake
          
             for (int i = 0; i < scores.Count(); i++)
             {
-                drawBarChart(g, scores[i], 40+i*50, name, Brushes.Blue);
+                drawBarChart(g, scores[i], 40+i*50, this.firebase.name, Brushes.Blue);
             }
 
         }
