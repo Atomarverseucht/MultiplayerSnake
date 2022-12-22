@@ -147,7 +147,7 @@ namespace MultiplayerSnake
             ManualResetEvent oSignalEvent = new ManualResetEvent(false);
 
             // value of foods changed, update it
-            this.client.Child("snake/foods").AsObservable<FoodsData>((sender, e) => Console.WriteLine(e.Exception), "").Subscribe(snapshot =>
+            this.client.Child("snake/foods").AsObservable<FoodsData>((sender, e) => Console.Error.WriteLine(e.Exception), "").Subscribe(snapshot =>
             {
                 if (string.IsNullOrWhiteSpace(snapshot.Key))
                 {
@@ -169,15 +169,13 @@ namespace MultiplayerSnake
                     this.foodManager.foods.AddOrUpdate(key, snapshot.Object, (oldKey, oldValue) => snapshot.Object);
                 }
 
-                Console.WriteLine(JsonConvert.SerializeObject(this.foodManager.foods));
-
                 // if first run, signal main thread to continue
                 oSignalEvent.Set();
             });
             oSignalEvent.WaitOne();
 
             // the food spawn type is forced by database
-            this.client.Child("snake/variables").AsObservable<VariablesData>((sender, e) => Console.WriteLine(e.Exception), "forcedFoodLevel").Subscribe(snapshot =>
+            this.client.Child("snake/variables").AsObservable<VariablesData>((sender, e) => Console.Error.WriteLine(e.Exception), "forcedFoodLevel").Subscribe(snapshot =>
             {
                 // set new forced food level
                 this.foodManager.forcedFoodLevel = snapshot.Object.forcedFoodLevel;
