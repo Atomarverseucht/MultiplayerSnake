@@ -18,6 +18,9 @@ namespace MultiplayerSnake
         // class containing everything about food
         public FoodManager foodManager;
 
+        // class containing everything about players
+        public PlayerManager playerManager;
+
         // the database
         public Firebase firebase;
 
@@ -89,22 +92,26 @@ namespace MultiplayerSnake
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            // init the food manager class
+            // create the food manager class
             this.foodManager = new FoodManager(this);
+
+            // create the player manager class
+            this.playerManager = new PlayerManager(this);
 
             // connect to database
             this.firebase = new Firebase(this);
 
             this.foodManager.init();
+            this.playerManager.init();
 
             // register the firebase listeners. this also performs a version check
             this.firebase.registerFireBaseListeners();
             
             // check if the game is already full
-            this.firebase.checkMaxPlayerCount();
+            this.playerManager.checkMaxPlayerCount();
 
             // let the user decide, which name he wants to use
-            this.firebase.chooseName();
+            this.playerManager.chooseName();
 
             // now we need to check, if we have to add foods
             this.foodManager.checkFoodsAvailable();
@@ -128,7 +135,7 @@ namespace MultiplayerSnake
          
             for (int i = 0; i < scores.Count(); i++)
             {
-                drawBarChart(g, scores[i], 40+i*50, this.firebase.name, Brushes.Blue);
+                drawBarChart(g, scores[i], 40+i*50, this.playerManager.name, Brushes.Blue);
             }
 
         }

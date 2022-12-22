@@ -23,26 +23,13 @@ namespace MultiplayerSnake
         private MainForm mainForm;
 
         // access to the manger class for foods
-        private FoodManager foodManger;
+        private FoodManager foodManager;
+
+        // access to the manger class for players
+        private PlayerManager playerManager;
 
         // the database client
         private FirebaseClient client;
-
-        // the player name
-        public string name = "";
-
-        // our snake color
-        public string my_snake_col = "";
-
-        // the other players
-        public ConcurrentDictionary<string, PlayerData> otherSnakes = new ConcurrentDictionary<string, PlayerData>();
-
-        // used to count online (registered) players
-        public ConcurrentDictionary<string, PlayerData> allSnakes = new ConcurrentDictionary<string, PlayerData>();
-
-        // if not negative, only this type of food will spawn
-        public int forcedFoodLevel = -1;
-
 
         public Firebase(MainForm mainForm)
         {
@@ -50,7 +37,9 @@ namespace MultiplayerSnake
 
             this.mainForm = mainForm;
 
-            this.foodManger = this.mainForm.foodManager;
+            this.foodManager = this.mainForm.foodManager;
+
+            this.playerManager = this.mainForm.playerManager;
         }
 
         /// <summary>
@@ -151,7 +140,7 @@ namespace MultiplayerSnake
         /// </summary>
         public void updateFoods()
         {
-            this.put(Constants.FIREBASE_FOODS_KEY, this.foodManger.foods);
+            this.put(Constants.FIREBASE_FOODS_KEY, this.foodManager.foods);
         }
 
         // set the listeners for firebase
@@ -174,15 +163,15 @@ namespace MultiplayerSnake
                 if (snapshot.EventType == FirebaseEventType.Delete)
                 {
                     // remove the food from the list
-                    this.foodManger.foods.TryRemove(key, out var ignored);
+                    this.foodManager.foods.TryRemove(key, out var ignored);
                 }
                 else
                 {
                     // add the food to the list
-                    this.foodManger.foods.AddOrUpdate(key, snapshot.Object, (oldKey, oldValue) => snapshot.Object);
+                    this.foodManager.foods.AddOrUpdate(key, snapshot.Object, (oldKey, oldValue) => snapshot.Object);
                 }
 
-                Console.WriteLine(JsonConvert.SerializeObject(this.foodManger.foods));
+                Console.WriteLine(JsonConvert.SerializeObject(this.foodManager.foods));
 
                 // if first run, signal main thread to continue
                 oSignalEvent.Set();
@@ -193,7 +182,7 @@ namespace MultiplayerSnake
             this.client.Child("snake/variables").AsObservable<VariablesData>((sender, e) => Console.WriteLine(e.Exception), "forcedFoodLevel").Subscribe(snapshot =>
             {
                 // set new forced food level
-                this.forcedFoodLevel = snapshot.Object.forcedFoodLevel;
+                this.foodManager.forcedFoodLevel = snapshot.Object.forcedFoodLevel;
 
                 // check for version changes, if version changed, close app
                 if (!this.checkVersion(snapshot.Object.version))
@@ -223,8 +212,8 @@ namespace MultiplayerSnake
                 if (snapshot.EventType == FirebaseEventType.Delete || playerData == null)
                 {
                     // remove the player
-                    this.allSnakes.TryRemove(key, out var ignored1);
-                    this.otherSnakes.TryRemove(key, out var ignored2);
+                    this.playerManager.allSnakes.TryRemove(key, out var ignored1);
+                    this.playerManager.otherSnakes.TryRemove(key, out var ignored2);
 
                     oSignalEvent.Set();
                     return;
@@ -235,143 +224,24 @@ namespace MultiplayerSnake
                     Console.WriteLine(playerData.pos.ElementAt(0).x);
 
                 // update all snakes (used to count online (registered) players)
-                this.allSnakes[key] = playerData;
+                this.playerManager.allSnakes[key] = playerData;
 
                 // check if the update data is for us
-                if (key == this.name)
+                if (key == this.playerManager.name)
                 {
                     // then we can set our own color
-                    this.my_snake_col = this.allSnakes[this.name].color;
+                    this.playerManager.my_snake_col = this.playerManager.allSnakes[this.playerManager.name].color;
                 }
 
                 // we need to have a seperate dict with only other players
-                this.otherSnakes = new ConcurrentDictionary<string, PlayerData>(this.allSnakes);
+                this.playerManager.otherSnakes = new ConcurrentDictionary<string, PlayerData>(this.playerManager.allSnakes);
                 // we ignore ourself
-                this.otherSnakes.TryRemove(this.name, out var ignored3);
+                this.playerManager.otherSnakes.TryRemove(this.playerManager.name, out var ignored3);
 
                 // if first run, signal main thread to continue
                 oSignalEvent.Set();
             });
             oSignalEvent.WaitOne();
-        }
-
-        /// <summary>
-        /// Get the current online players.
-        /// </summary>
-        public int getOnlinePlayers()
-        {
-            return this.allSnakes.Count;
-        }
-
-        /// <summary>
-        /// Get the players, currently playing.
-        /// </summary>
-        public int getActivePlayers()
-        {
-            int count = 0;
-
-             // go threw all snakes
-            foreach (PlayerData snake in this.allSnakes.Values)
-            {
-
-                // check if the snake is playing, by checking if there are positions set
-                if (snake.pos != null && snake.pos.Any())
-                {
-                    count++;
-                }
-            }
-            return count;
-        }
-
-        /// <summary>
-        /// Check if there are more players online, then max player count.
-        /// </summary>
-        public void checkMaxPlayerCount()
-        {
-            // max 15 players
-            while (getOnlinePlayers() >= Constants.MAX_PLAYERS)
-            {
-                MessageBox.Show("The Game is full (15/15). Click the button to retry.", "Error");
-            }
-        }
-
-        public void chooseName()
-        {
-            this.name = "";
-
-            while (this.name == "")
-            {
-                // prompt the player to enter a name
-                DialogResult res = InputBox.ShowDialog("Choose a player name:\n\n\".\", \"/\", \"#\", \"$\", \"[\", or \"]\" will be replaced by \"_\".", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
-                if (res == DialogResult.None)
-                {
-                    Application.Exit();
-                }
-                string tempName = InputBox.ResultValue;
-                this.name = tempName == null ? "" : tempName;
-
-                // replace unwanted symbols with underscore
-                this.name = this.name.Replace(".", "_").Replace("#", "_").Replace("$", "_").Replace("[", "_").Replace("]", "_").Replace("/", "_");
-
-                if (this.name.Length > 16)
-                {
-                    MessageBox.Show("This name is too long.", "Error");
-                    this.name = "";
-                    continue;
-                }
-
-                // the color value is set, so there must be a user, that has taken this name
-                if (this.queryOnce<string>(Constants.FIREBASE_PLAYER_COLOR_KEY.Replace("%name%", this.name)) != null)
-                {
-                    MessageBox.Show("Someone has already chosen this name.", "Error");
-                    this.name = "";
-                }
-            }
-
-            // name set successfully, we can run the game now  and we need to save the name
-            // in a separate key to get access to write our data later, this will also restrict
-            // the access to this entry only for us
-            this.put(Constants.FIREBASE_PLAYER_VERIFY_NAME_KEY.Replace("%name%", this.name), this.name);
-
-            // if player disconnect (closes window), remove data
-            Application.ApplicationExit += (sender, e) =>
-            {
-                this.delete(Constants.FIREBASE_PLAYER_VERIFY_NAME_KEY.Replace("%name%", this.name));
-            };
-        }
-
-        public string getRandomColor()
-        {
-            string[] unusedColors = getUnusedColors();
-            string color = unusedColors[Utils.RANDOM.Next(0, unusedColors.Length)];
-            return color;
-        }
-
-        public string[] getUnusedColors()
-        {
-            string[] usedColors = new string[] {};
-            string[] unusedColors = new string[] {};
-            int i = 0;
-            foreach (PlayerData otherSnake in otherSnakes.Values)
-            {
-                if(otherSnake == null || otherSnake.color == null)
-                {
-                    continue;
-                }
-                usedColors[i++] = otherSnake.color;
-                i++;
-            }
-
-            i = 0;
-            foreach (string colorName in Constants.COLORS)
-            {
-                if (!usedColors.Contains(colorName))
-                {
-                    unusedColors[i] = colorName;
-                    i++;
-                }
-            }
-            return unusedColors;
         }
     }
 }
