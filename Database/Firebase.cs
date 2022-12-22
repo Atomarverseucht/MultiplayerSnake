@@ -219,17 +219,23 @@ namespace MultiplayerSnake
             });
             oSignalEvent.WaitOne();
         }
-        
+
+        // get the current online players
         public int getOnlinePlayers()
         {
             return this.allSnakes.Count;
         }
 
+        // get the players, currently playing
         public int getActivePlayers()
         {
             int count = 0;
+
+             // go threw all snakes
             foreach (PlayerData snake in this.allSnakes.Values)
             {
+
+                // check if the snake is playing, by checking if there are positions set
                 if (snake.pos != null && snake.pos.Any())
                 {
                     count++;
@@ -238,8 +244,10 @@ namespace MultiplayerSnake
             return count;
         }
 
+        // check if there are more players online, then max player count
         public void checkMaxPlayerCount()
         {
+            // max 15 players
             while (getOnlinePlayers() >= Constants.MAX_PLAYERS)
             {
                 MessageBox.Show("The Game is full (15/15). Click the button to retry.", "Error");
