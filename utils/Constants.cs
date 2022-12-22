@@ -44,7 +44,7 @@ namespace MultiplayerSnake.Database
         /// the database key for the root of a player's data<br/>
         /// %name% must be replaced by the player name
         /// </summary>
-        public const string FIREBASE_PLAYER_KEY = "players/%player%";
+        public const string FIREBASE_PLAYER_KEY = "players/%name%";
 
         /// <summary>
         /// the database key for the player color.<br/>

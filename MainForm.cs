@@ -113,6 +113,9 @@ namespace MultiplayerSnake
             // let the user decide, which name he wants to use
             this.playerManager.chooseName();
 
+            // choose the color
+            this.playerManager.chooseRandomColor();
+
             // now we need to check, if we have to add foods
             this.foodManager.checkFoodsAvailable();
             

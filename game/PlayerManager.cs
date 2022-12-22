@@ -1,6 +1,7 @@
 ﻿using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
 using MultiplayerSnake.utils;
+using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Windows.Forms;
@@ -22,7 +23,7 @@ namespace MultiplayerSnake.game
         public string name = "";
 
         // our snake color
-        public string my_snake_col = "";
+        public string color = "";
 
         // the other players
         public ConcurrentDictionary<string, PlayerData> otherSnakes = new ConcurrentDictionary<string, PlayerData>();
@@ -125,21 +126,31 @@ namespace MultiplayerSnake.game
             // if player disconnect (closes window), remove data
             Application.ApplicationExit += (sender, e) =>
             {
-                this.firebase.delete(Constants.FIREBASE_PLAYER_VERIFY_NAME_KEY.Replace("%name%", this.name));
+                this.firebase.delete(Constants.FIREBASE_PLAYER_KEY.Replace("%name%", this.name));
             };
         }
 
-        public string getRandomColor()
+        /// <summary>
+        /// Choose a random color for our snake, that isn't used.
+        /// </summary>
+        public void chooseRandomColor()
         {
             string[] unusedColors = getUnusedColors();
-            string color = unusedColors[Utils.RANDOM.Next(0, unusedColors.Length)];
-            return color;
+
+            this.color = unusedColors[Utils.RANDOM.Next(unusedColors.Length)];
+
+            this.firebase.put(Constants.FIREBASE_PLAYER_COLOR_KEY.Replace("%name%", this.name), this.color);
         }
 
+        /// <summary>
+        /// Get all colors, which aren't used by any player.
+        /// </summary>
         public string[] getUnusedColors()
         {
-            string[] usedColors = new string[] { };
-            string[] unusedColors = new string[] { };
+            string[] usedColors = new string[Constants.MAX_PLAYERS];
+            string[] unusedColors = new string[Constants.MAX_PLAYERS];
+
+            // getting all used colors
             int i = 0;
             foreach (PlayerData otherSnake in otherSnakes.Values)
             {
@@ -151,6 +162,8 @@ namespace MultiplayerSnake.game
                 i++;
             }
 
+            // looping threw all available colors, then checking if the color
+            // is in the list of used colors, if it isn't, the color is unused
             i = 0;
             foreach (string colorName in Constants.COLORS)
             {
@@ -160,6 +173,8 @@ namespace MultiplayerSnake.game
                     i++;
                 }
             }
+
+            // now we have a list of unused colors, which we can return
             return unusedColors;
         }
     }

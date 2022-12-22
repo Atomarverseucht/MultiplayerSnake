@@ -228,7 +228,7 @@ namespace MultiplayerSnake
                 if (key == this.playerManager.name)
                 {
                     // then we can set our own color
-                    this.playerManager.my_snake_col = this.playerManager.allSnakes[this.playerManager.name].color;
+                    this.playerManager.color = this.playerManager.allSnakes[this.playerManager.name].color;
                 }
 
                 // we need to have a seperate dict with only other players
