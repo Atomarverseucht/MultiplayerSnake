@@ -1,8 +1,4 @@
 ﻿using Firebase.Database;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MultiplayerSnake.Database
@@ -15,27 +11,29 @@ namespace MultiplayerSnake.Database
         public const string FIREBASE_URL = "https://psyched-canto-311609-default-rtdb.europe-west1.firebasedatabase.app";
 
         /// <summary>
-        /// database app secret
+        /// database api key
         /// </summary>
-        public const string FIREBASE_AUTH = "AIzaSyBbRpK_BcltEmRQzLAUCFykMHEq5PQWWz4";
+        public const string FIREBASE_API_KEY = "yQ1sXul4apTcUJgy6JwmW5lZ3r8uMbFn2tdQmbIY";
+
+        //public static readonly FirebaseAuthProvider FIREBASE_AUTH_PROVIDER = new FirebaseAuthProvider(new FirebaseConfig(FIREBASE_API_KEY));
 
         /// <summary>
         /// The firebase configuration
         /// </summary>
         public static FirebaseOptions FIREBASE_CONFIG = new FirebaseOptions
         {
-            AuthTokenAsyncFactory = () => Task.FromResult(FIREBASE_AUTH)
+            AuthTokenAsyncFactory = () => Task.FromResult(FIREBASE_API_KEY)
         };
 
         /// <summary>
         /// the version of the client
         /// </summary>
-        public const int CLIENT_VERSION = 11;
+        public const int CLIENT_VERSION = 12;
 
         /// <summary>
         /// the database key for the version
         /// </summary>
-        public const string FIREBASE_KEY_VERSION = "version";
+        public const string FIREBASE_KEY_VERSION = "variables/version";
 
         /// <summary>
         /// All snake colors available

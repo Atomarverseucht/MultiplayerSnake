@@ -60,12 +60,14 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="database\data\FoodData.cs" />
+    <Compile Include="database\data\FoodsData.cs" />
     <Compile Include="database\data\PlayerData.cs" />
+    <Compile Include="database\data\PlayerPositionData.cs" />
+    <Compile Include="database\data\VariablesData.cs" />
     <Compile Include="utils\Constants.cs" />
     <Compile Include="database\Firebase.cs" />
     <Compile Include="FullScreen.cs" />
-    <Compile Include="InputBox.cs" />
+    <Compile Include="utils\InputBox.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,6 +79,7 @@
     <Compile Include="utils\Utils.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
