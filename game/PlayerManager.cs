@@ -96,6 +96,7 @@ namespace MultiplayerSnake.game
                 if (res == DialogResult.None)
                 {
                     Application.Exit();
+                    return;
                 }
                 string tempName = InputBox.ResultValue;
                 this.name = tempName == null ? "" : tempName;
