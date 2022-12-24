@@ -2,6 +2,7 @@
 using MultiplayerSnake.Database;
 using MultiplayerSnake.utils;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Windows.Forms;
@@ -31,6 +32,25 @@ namespace MultiplayerSnake.game
         // used to count online (registered) players
         public ConcurrentDictionary<string, PlayerData> allSnakes = new ConcurrentDictionary<string, PlayerData>();
 
+        // can we send data to database (we should be invisible for other players
+        // in countdown sequence, but visible for ourself)
+        public bool isInvisibleForOthers = true;
+
+        // our snake
+        public ConcurrentBag<PlayerPositionData> snake = new ConcurrentBag<PlayerPositionData>();
+
+        // horizontal snake move delta
+        public int deltaX = 10;
+
+        // vertical snake move delta
+        public int deltaY = 0;
+
+        // are we currently changing direction?
+        public bool changingDirection = false;
+
+        // the last score we had, to display it after death in title
+        public int lastScore = 0;
+
         public PlayerManager(MainForm mainForm)
         {
             this.mainForm = mainForm;
@@ -43,6 +63,18 @@ namespace MultiplayerSnake.game
         {
             this.firebase = this.mainForm.firebase;
             this.foodManager = this.mainForm.foodManager;
+        }
+
+        /// <summary>
+        /// save our playerdata to database
+        /// </summary>
+        /// <param name="snakeData">the position data to save</param>
+        public void setPlayerData(ConcurrentBag<PlayerPositionData> snakeData)
+        {
+            if (isInvisibleForOthers) {
+                snakeData = new ConcurrentBag<PlayerPositionData>();
+            }
+            this.firebase.put(Constants.FIREBASE_PLAYER_POS_KEY.Replace("%name%", this.name), snakeData);
         }
 
         /// <summary>
@@ -177,6 +209,51 @@ namespace MultiplayerSnake.game
 
             // now we have a list of unused colors, which we can return
             return unusedColors;
+        }
+
+        /// <summary>
+        /// generate a random snake array which is 5 long (only start point is random, other 4 are relative to start point)
+        /// </summary>
+        /// <returns></returns>
+        public ConcurrentBag<PlayerPositionData> generateRandomSnake()
+        {
+            // getting random coordinates, in x direction with a distance of min 4 gaps to the wall
+            var randomX = Utils.randomCoordinateX(4);
+            var randomY = Utils.randomCoordinateY();
+            // the coordinates for the snake, we will calculate
+            ConcurrentBag<PlayerPositionData> snakeCoords = new ConcurrentBag<PlayerPositionData>();
+
+            // just fill the array with 5 coordinate pairs, the x is descending, the higher the key is
+            for (int i = 0; i < 5; i++)
+            {
+                int currentPart = i * 10;
+                snakeCoords.Add(new PlayerPositionData(randomX - currentPart, randomY));
+            }
+
+            return snakeCoords;
+        }
+
+        /// <summary>
+        /// check if the player collides with any other player
+        /// </summary>
+        public bool checkForCollisionWithOtherSnakes()
+        {
+            foreach (PlayerData playerData in this.otherSnakes.Values)
+            {
+                ConcurrentBag<PlayerPositionData> otherSnake = playerData.pos;
+
+                if (otherSnake == null) continue;
+
+                // if head is at same position as any part of the other snake, then the player collided
+                foreach (PlayerPositionData positionData in otherSnake)
+                {
+                    if (positionData.x == this.snake.ElementAt(0).x && positionData.y == snake.ElementAt(0).y)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

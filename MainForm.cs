@@ -2,11 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Net;
-using System.Net.Http;
 using System.Windows.Forms;
 using System.Linq;
 using MultiplayerSnake.game;
+using System.Threading.Tasks;
+using MultiplayerSnake.utils;
+using MultiplayerSnake.database.data;
 
 namespace MultiplayerSnake
 {
@@ -14,6 +15,18 @@ namespace MultiplayerSnake
     {
         // class to control going in fullscreen with F11
         private FullScreen fullScreen;
+
+        // is this the first time, the main form was initialized?
+        private bool firstInit = false;
+
+        // did we request an update of the picture box?
+        private bool updateRequested = false;
+
+        // countdown before start
+        private int countdown = 6;
+
+        // the time of the last graphics update
+        private long timeLastGraphicsUpdate = -1;
 
         // class containing everything about food
         public FoodManager foodManager;
@@ -23,6 +36,9 @@ namespace MultiplayerSnake
 
         // the database
         public Firebase firebase;
+
+        // is the game already ended?
+        private bool isGameEnded = false;
 
         public MainForm()
         {
@@ -92,6 +108,9 @@ namespace MultiplayerSnake
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            if (this.firstInit)
+                return;
+
             // create the food manager class
             this.foodManager = new FoodManager(this);
 
@@ -118,11 +137,240 @@ namespace MultiplayerSnake
 
             // now we need to check, if we have to add foods
             this.foodManager.checkFoodsAvailable();
+
+            // set the last graphics update to now
+            this.timeLastGraphicsUpdate = Utils.currentTimeMillis();
+
+            // start the main loop, when this method ended execution
+            this.updateRequested = true;
+            this.pbGame.Invalidate();
+
+            this.startGame();
             
             tmUpdate.Start();
-            return;
+            this.firstInit = true;
         }
-        
+
+        /// <summary>
+        /// reset everything and start the game
+        /// </summary>
+        public void startGame()
+        {
+            // reset the last graphics update time to now
+            this.timeLastGraphicsUpdate = Utils.currentTimeMillis();
+            // reset countdown
+            this.countdown = 6;
+            // reset snake pos to random position
+            this.playerManager.isInvisibleForOthers = true;
+            this.playerManager.snake = this.playerManager.generateRandomSnake();
+            // reset game isn't ended
+            this.isGameEnded = false;
+
+            // start the countdown
+            _ = this.startCountdown();
+        }
+
+        /// <summary>
+        /// show countdown
+        /// </summary>
+        public async Task startCountdown()
+        {
+            while (true)
+            {
+                this.countdown--;
+                if (this.countdown > 0 && this.countdown <= 3)
+                {
+                    // countdown visible
+                    lbStatus.Text = this.countdown.ToString();
+                    await Task.Delay(500);
+                    continue;
+                }
+                else if (this.countdown > 0)
+                {
+                    // "Get ready!" visible
+                    lbStatus.Text = "Get ready!";
+                    await Task.Delay(500);
+                    continue;
+                }
+                else
+                {
+                    // if there is a snake on our position, wait for it to go away
+                    if (this.playerManager.checkForCollisionWithOtherSnakes())
+                    {
+                        this.countdown = -1;
+                        lbStatus.Text = "Waiting for other snake to go away...";
+                        await Task.Delay(500);
+                        continue;
+                    }
+
+                    // reset go direction
+                    this.playerManager.deltaX = 10;
+                    this.playerManager.deltaY = 0;
+
+                    // countdown is finished, we don't need to wait
+                    this.countdown = 0;
+
+                    this.playerManager.isInvisibleForOthers = false;
+
+                    // "Go" visible for 3 secs
+                    await this.sendInfo("Go!", 3000);
+                    break;
+                }
+            }
+        }
+
+        private void pbGame_Paint(object sender, PaintEventArgs e)
+        {
+            // we can only update, if there was an update requested by us
+            if (!this.updateRequested)
+                return;
+
+            this.updateRequested = false;
+
+            // call the main loop that will invalidate the picturebox which calls this method again
+            _ = this.loop(e.Graphics);
+        }
+
+        /// <summary>
+        /// the game/main loop.
+        /// </summary>
+        /// <param name="g">the graphics object of the picturebox</param>
+        public async Task loop(Graphics g)
+        {
+            // the current time
+            long timeNow = Utils.currentTimeMillis();
+            // the time estimated since last update
+            long timeEstimated = timeNow - this.timeLastGraphicsUpdate;
+
+            if (timeEstimated >= Constants.SNAKE_UPDATE_DELAY)
+            {
+                // the time, we were waiting too long
+                var timeTooLong = timeEstimated - Constants.SNAKE_UPDATE_DELAY;
+
+                // the count, how often we have to call the tick method, based on the time, we were waiting too long, at least one time
+                int loopCount = Math.Max(1, (int)Math.Round((double) timeTooLong / Constants.SNAKE_UPDATE_DELAY));
+
+                for (int i = 0; i < loopCount; i++)
+                {
+                    // tick the game
+                    this.playerManager.changingDirection = false;
+                    await this.tick(g);
+                }
+
+                // send playerdata just once after the for loop, if snake is set
+                if (this.playerManager.snake.Count != 0) this.playerManager.setPlayerData(this.playerManager.snake);
+
+                // set the last update time to now
+                timeLastGraphicsUpdate = Utils.currentTimeMillis();
+            }
+
+            await Task.Delay(1);
+            this.updateRequested = true;
+            pbGame.Invalidate();
+        }
+
+        /// <summary>
+        /// tick the game
+        /// </summary>
+        /// <param name="g">the graphics object of the picturebox</param>
+        public async Task tick(Graphics g)
+        {
+            this.updateSideBar();
+
+            //this.clearBoard(g);
+            //this.foodManager.drawFoods(g);
+            //this.playerManager.handleOtherSnakes(g);
+
+            //if (this.countdown != 0)
+            //{
+            //    // wait for countdown finsih
+            //}
+            //else if (this.isGameEnded || this.playerManager.snake.length <= 0 || this.playerManager.checkForCollision())
+            //{
+            //    // game ended for us
+            //    // first call, then call onGameEnd()
+            //    if (!this.isGameEnded) this.onGameEnd();
+            //}
+            //else
+            //{
+            //    // we are still in
+            //    // move the snake (change values in array, and handle key presses)
+            //    this.playerManager.moveSnake();
+            //}
+
+            //// we always need to draw the snake, so if it's there, it will be shown
+            //this.playerManager.drawSnake(g);
+        }
+
+        /// <summary>
+        /// send an info to the status display
+        /// </summary>
+        /// <param name="str">the string to send</param>
+        /// <param name="duration">the duration the string should be shown</param>
+        /// <param name="color">the color of the string shown</param>
+        /// <returns></returns>
+        public async Task sendInfo(string str, int duration, string color = "Black")
+        {
+            // show
+            lbStatus.Show();
+
+            // set text and color
+            lbStatus.ForeColor = Color.FromName(color);
+            lbStatus.Text = str;
+
+            await Task.Delay(duration);
+
+            // hide, if the innerHTML is still the given string and color
+            if (lbStatus.Text.Equals(str) && lbStatus.ForeColor.Name.Equals(Color.FromName(color).Name))
+            {
+                lbStatus.Hide();
+            }
+        }
+
+        // update side status bar
+        public void updateSideBar()
+        {
+            Dictionary<string, int> scores = new Dictionary<string, int>();
+            string formattedScore = "";
+
+            int i = 0;
+            // put all the scores and the player name in array
+            foreach (string playerName in this.playerManager.allSnakes.Keys)
+            {
+                this.playerManager.allSnakes.TryGetValue(playerName, out PlayerData playerData);
+                if (playerData == null)
+                {
+                    continue;
+                }
+
+                int score = playerData.pos == null ? -5 : playerData.pos.Count - 5;
+
+                this.playerManager.lastScore =
+                    score >= 0 && playerName == this.playerManager.name
+                    ? score
+                    : this.playerManager.lastScore;
+
+                scores.Add(playerName, score);
+                i++;
+            }
+
+            // loop threw the descending sorted array
+            foreach (KeyValuePair<string, int> scoreData in scores.OrderByDescending(keyValuePair => keyValuePair.Value))
+            {
+
+                // and getting player name, score and the snake data
+                int score = scoreData.Value;
+                string playerName = scoreData.Key;
+                PlayerData snakeData = this.playerManager.allSnakes[playerName];
+
+                // add the data as html to the score string
+                formattedScore += "<span style=\"color:" + snakeData.color + ";text-shadow: 1px 0 Black, -1px 0 Black, 0 1px Black, 0 -1px Black, 1px 1px Black, -1px -1px Black, -1px 1px Black, 1px -1px Black;\">"
+                + Utils.htmlEntities(playerName) + "</span>: " + (score < -4 ? "Spectator" : score.ToString()) + "<br>";
+            }
+
+            lbSidebar.Text = "Online: " + this.playerManager.getOnlinePlayers() + "/15<br><br>" + formattedScore;
+        }
+
         /// <summary>
         /// Updates bar chart
         /// </summary>
@@ -171,9 +419,8 @@ namespace MultiplayerSnake
         // Timer
         private void tmUpdate_Tick(object sender, EventArgs e)
         {
-            updateBarChart(pnSidebar.CreateGraphics());
+            //updateBarChart(lbSidebar.CreateGraphics());
             
         }
-
     }
 }

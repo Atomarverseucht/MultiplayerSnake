@@ -2,6 +2,14 @@
 {
     public class PlayerPositionData
     {
+        public PlayerPositionData() { }
+
+        public PlayerPositionData(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+
         /// <summary>
         /// Player x position
         /// </summary>
