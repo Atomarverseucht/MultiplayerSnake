@@ -231,7 +231,6 @@ namespace MultiplayerSnake
 
                 // we need to have a seperate dict with only other players
                 this.playerManager.otherSnakes = new ConcurrentDictionary<string, PlayerData>(this.playerManager.allSnakes);
-                // we ignore ourself
                 this.playerManager.otherSnakes.TryRemove(this.playerManager.name, out var ignored3);
 
                 // if first run, signal main thread to continue
