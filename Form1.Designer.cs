@@ -96,6 +96,7 @@
             // 
             // lbScore
             // 
+            this.lbScore.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lbScore.AutoSize = true;
             this.lbScore.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbScore.Location = new System.Drawing.Point(12, 399);
@@ -103,6 +104,7 @@
             this.lbScore.Size = new System.Drawing.Size(60, 24);
             this.lbScore.TabIndex = 8;
             this.lbScore.Text = "Score";
+            this.lbScore.Visible = false;
             // 
             // MainForm
             // 
