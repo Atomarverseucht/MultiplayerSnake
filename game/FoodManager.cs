@@ -1,7 +1,11 @@
 ﻿using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
 using MultiplayerSnake.utils;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Drawing;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace MultiplayerSnake.game
 {
@@ -16,8 +20,12 @@ namespace MultiplayerSnake.game
         // access to the manger class for players
         private PlayerManager playerManager;
 
+        // lightness of all foods. the foods are slowly sweeping up
+        // and down in brightness to show, that they are foods.
+        private int foodLightness = 0;
+
         // food positions
-        public ConcurrentDictionary<int, FoodsData> foods = new ConcurrentDictionary<int, FoodsData>();
+        public List<FoodsData> foods = new List<FoodsData>();
 
         // if not negative, only this type of food will spawn
         public int forcedFoodLevel = -1;
@@ -36,11 +44,90 @@ namespace MultiplayerSnake.game
             this.playerManager = this.mainForm.playerManager;
         }
 
+        /// <summary>
+        /// save a new food position
+        /// </summary>
+        /// <param name="x">x pos of the food</param>
+        /// <param name="y">y pos of the food</param>
+        /// <param name="level">the level of the food</param>
         public void addFood(int x, int y, int level)
         {
-            this.foods.AddOrUpdate(this.foods.Count, new FoodsData(x, y, level), (oldKey, oldValue) => new FoodsData(x, y, level));
+            this.addFood(new FoodsData(x, y, level));
+        }
 
+        /// <summary>
+        /// save a new food position
+        /// </summary>
+        /// <param name="foodData">the food data to save</param>
+        public void addFood(FoodsData foodData)
+        {
+            this.foods.Add(foodData);
+        }
+
+        /// <summary>
+        /// remove a food
+        /// </summary>
+        /// <param name="x">the x position of the food to remove</param>
+        /// <param name="y">the y position of the food to remove</param>
+        /// <returns>the level of the food removed</returns>
+        public int removeFood(int x, int y)
+        {
+            // the new food data
+            List<FoodsData> newFoods = new List<FoodsData>();
+            // the food level of the removed food
+            int foodLevel = Constants.FOOD_LEVEL_RANDOM;
+
+            foreach (FoodsData food in foods)
+            {
+                // getting the data of the other food
+                int foodX = food.x;
+                int foodY = food.y;
+
+                // if the data isn't equal to our data, we will add it to the new list
+                if (x != foodX || y != foodY)
+                {
+                    newFoods.Add(food);
+                }
+                else
+                {
+                    foodLevel = food.level;
+                }
+            }
+
+            // update the food array
+            this.foods = newFoods;
             this.firebase.updateFoods();
+
+            return foodLevel;
+        }
+
+        /// <summary>
+        /// generate a new random food location
+        /// </summary>
+        public FoodsData genFood()
+        {
+            // Generate a random number the food x-coordinate
+            var foodX = Utils.randomCoordinateX();
+            // Generate a random number for the food y-coordinate
+            var foodY = Utils.randomCoordinateY();
+
+            // if the new food location is where a snake currently is, generate a new food location
+            foreach (PlayerData playerData in this.playerManager.allSnakes.Values)
+            {
+                if (playerData.pos == null)
+                    continue;
+
+                foreach (PlayerPositionData part in playerData.pos)
+                {
+                    bool has_eaten = part.x == foodX && part.y == foodY;
+                    if (has_eaten)
+                    {
+                        genFood();
+                    }
+                }
+            }
+
+            return new FoodsData(foodX, foodY, this.randomFoodLevel());
         }
 
         public int randomFoodLevel()
@@ -83,7 +170,127 @@ namespace MultiplayerSnake.game
             if (this.playerManager.getActivePlayers() <= 1 && this.foods.Count == 0)
             {
                 addFood(Utils.randomCoordinateX(), Utils.randomCoordinateY(), randomFoodLevel());
+                this.firebase.updateFoods();
             }
+        }
+
+        /// <summary>
+        /// draws all foods in the food dictionary
+        /// </summary>
+        /// <param name="g"></param>
+        public void drawFoods(Graphics g)
+        {
+            foreach (FoodsData food in this.foods)
+            {
+                Rectangle rect = new Rectangle(food.x, food.y, 10, 10);
+                g.FillRectangle(new SolidBrush(this.currentFoodLightness(Utils.getFoodColorByLevel(food.level))), rect);
+                g.DrawRectangle(Pens.Black, rect);
+            }
+
+            // increase lightness
+            this.foodLightness++;
+        }
+
+        /// <summary>
+        /// get the current food color with the blink effect
+        /// </summary>
+        /// <param name="hue">the color of the food</param>
+        /// <returns>the color with applied lightness</returns>
+        public Color currentFoodLightness(double hue)
+        {
+            if (this.foodLightness == 50)
+            {
+                foodLightness = -50;
+            }
+
+            return Utils.ColorFromHSV(hue, 1, ((foodLightness < 0 ? (foodLightness * -1) : foodLightness) + 50) / 100.0);
+        }
+
+        /// <summary>
+        /// check if a player has eaten a food
+        /// </summary>
+        /// <returns></returns>
+        public bool hasEatenFood()
+        {
+            foreach (FoodsData food in foods)
+            {
+                if (this.playerManager.snake[0].x == food.x && this.playerManager.snake[0].y == food.y)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// handle the collection of food
+        /// </summary>
+        /// <returns>the level of the removed food</returns>
+        public int handleFoodCollect()
+        {
+            // removing old food
+            int removedOldFoodLevel = this.removeFood(this.playerManager.snake[0].x, this.playerManager.snake[0].y);
+
+            // creating new food
+            int foodCount = Math.Max(1, (int)Math.Round(this.playerManager.getActivePlayers() / 2.0));
+            foodCount = foodCount - this.foods.Count;
+
+            for (var i = 0; i < foodCount; i++)
+            {
+                FoodsData randomFood = null;
+                bool noFoodPosFound = true;
+
+                // search for a food pos, which isn't in use
+                while (noFoodPosFound)
+                {
+                    randomFood = this.genFood();
+
+                    // there are no positions to check
+                    if (this.foods.Count == 0)
+                        noFoodPosFound = false;
+
+                    // check all other food positions to avoid overlap
+                    foreach (FoodsData food in this.foods)
+                    {
+                        if (food.x != randomFood.x || food.y != randomFood.y)
+                        {
+                            noFoodPosFound = false;
+                        }
+                    }
+                }
+
+                // and add it
+                this.addFood(randomFood);
+            }
+
+            this.firebase.updateFoods();
+
+            return removedOldFoodLevel;
+        }
+
+        /// <summary>
+        /// drop random foods when the player died
+        /// </summary>
+        public void dropRandomFood()
+        {
+            // don't drop, if player has score 0
+            if (this.playerManager.snake.Count <= 5)
+                return;
+
+            foreach (PlayerPositionData part in this.playerManager.snake)
+            {
+                // ignore this pos, if it is in the wall...
+                if ((part.x < 0 || part.x > (Constants.SNAKEBOARD_MAX_X - 10))
+                    || (part.y < 0 || part.y > (Constants.SNAKEBOARD_MAX_Y - 10)))
+                    continue;
+
+                // drop random food at random positions in snake, ca. 16,67% probability to drop for each
+                if (Utils.RANDOM.Next(6) == 0)
+                    addFood(part.x, part.y, randomFoodLevel());
+            }
+
+            this.firebase.updateFoods();
         }
     }
 }

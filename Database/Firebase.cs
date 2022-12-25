@@ -7,6 +7,7 @@ using MultiplayerSnake.game;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
@@ -67,13 +68,15 @@ namespace MultiplayerSnake
         /// <typeparam name="T">The type of the data to update/set</typeparam>
         /// <param name="key">the path to the data</param>
         /// <param name="value">the data to update/set</param>
+        /// <param name="async">if we should wait for the task to complete</param>
         /// <returns>if the data was set successfully</returns>
-        public bool put<T>(string key, T value)
+        public bool put<T>(string key, T value, bool async=false)
         {
             try
             {
                 var task = this.client.Child("snake/" + key).PutAsync<T>(value);
-                Task.WaitAll(task);
+                if (!async)
+                    Task.WaitAll(task);
                 return true;
             }
             catch (Exception ex)
@@ -141,6 +144,19 @@ namespace MultiplayerSnake
             this.put(Constants.FIREBASE_FOODS_KEY, this.foodManager.foods);
         }
 
+        /// <summary>
+        /// save our playerdata to database
+        /// </summary>
+        /// <param name="snakeData">the position data to save</param>
+        public void setPlayerData(List<PlayerPositionData> snakeData)
+        {
+            if (this.playerManager.isInvisibleForOthers)
+            {
+                snakeData = new List<PlayerPositionData>();
+            }
+            this.put(Constants.FIREBASE_PLAYER_POS_KEY.Replace("%name%", this.playerManager.name), snakeData, true);
+        }
+
         // set the listeners for firebase
         public void registerFireBaseListeners()
         {
@@ -161,12 +177,16 @@ namespace MultiplayerSnake
                 if (snapshot.EventType == FirebaseEventType.Delete)
                 {
                     // remove the food from the list
-                    this.foodManager.foods.TryRemove(key, out var ignored);
+                    this.foodManager.foods.RemoveAt(key);
                 }
                 else
                 {
                     // add the food to the list
-                    this.foodManager.foods.AddOrUpdate(key, snapshot.Object, (oldKey, oldValue) => snapshot.Object);
+                    if (this.foodManager.foods.Count > key && this.foodManager.foods[key] != null)
+                    {
+                        this.foodManager.foods.RemoveAt(key);
+                    }
+                    this.foodManager.foods.Insert(key, snapshot.Object);
                 }
 
                 // if first run, signal main thread to continue
@@ -214,10 +234,6 @@ namespace MultiplayerSnake
                     oSignalEvent.Set();
                     return;
                 }
-
-                // TODO debug remove
-                if (playerData.pos != null && playerData.pos.Any())
-                    Console.WriteLine(playerData.pos.ElementAt(0).x);
 
                 // update all snakes (used to count online (registered) players)
                 this.playerManager.allSnakes[key] = playerData;

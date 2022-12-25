@@ -4,8 +4,11 @@ using MultiplayerSnake.utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Input;
 
 namespace MultiplayerSnake.game
 {
@@ -37,7 +40,7 @@ namespace MultiplayerSnake.game
         public bool isInvisibleForOthers = true;
 
         // our snake
-        public ConcurrentBag<PlayerPositionData> snake = new ConcurrentBag<PlayerPositionData>();
+        public List<PlayerPositionData> snake = new List<PlayerPositionData>();
 
         // horizontal snake move delta
         public int deltaX = 10;
@@ -51,6 +54,9 @@ namespace MultiplayerSnake.game
         // the last score we had, to display it after death in title
         public int lastScore = 0;
 
+        // how long should the snake tail stay in place, after a food was eaten?
+        int tailWaitCount = 0;
+
         public PlayerManager(MainForm mainForm)
         {
             this.mainForm = mainForm;
@@ -63,18 +69,6 @@ namespace MultiplayerSnake.game
         {
             this.firebase = this.mainForm.firebase;
             this.foodManager = this.mainForm.foodManager;
-        }
-
-        /// <summary>
-        /// save our playerdata to database
-        /// </summary>
-        /// <param name="snakeData">the position data to save</param>
-        public void setPlayerData(ConcurrentBag<PlayerPositionData> snakeData)
-        {
-            if (isInvisibleForOthers) {
-                snakeData = new ConcurrentBag<PlayerPositionData>();
-            }
-            this.firebase.put(Constants.FIREBASE_PLAYER_POS_KEY.Replace("%name%", this.name), snakeData);
         }
 
         /// <summary>
@@ -215,13 +209,13 @@ namespace MultiplayerSnake.game
         /// generate a random snake array which is 5 long (only start point is random, other 4 are relative to start point)
         /// </summary>
         /// <returns></returns>
-        public ConcurrentBag<PlayerPositionData> generateRandomSnake()
+        public List<PlayerPositionData> generateRandomSnake()
         {
             // getting random coordinates, in x direction with a distance of min 4 gaps to the wall
             var randomX = Utils.randomCoordinateX(4);
             var randomY = Utils.randomCoordinateY();
             // the coordinates for the snake, we will calculate
-            ConcurrentBag<PlayerPositionData> snakeCoords = new ConcurrentBag<PlayerPositionData>();
+            List<PlayerPositionData> snakeCoords = new List<PlayerPositionData>();
 
             // just fill the array with 5 coordinate pairs, the x is descending, the higher the key is
             for (int i = 0; i < 5; i++)
@@ -240,7 +234,7 @@ namespace MultiplayerSnake.game
         {
             foreach (PlayerData playerData in this.otherSnakes.Values)
             {
-                ConcurrentBag<PlayerPositionData> otherSnake = playerData.pos;
+                List<PlayerPositionData> otherSnake = playerData.pos;
 
                 if (otherSnake == null) continue;
 
@@ -254,6 +248,207 @@ namespace MultiplayerSnake.game
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// draws the movement of other snakes to the graphics
+        /// </summary>
+        public void handleOtherSnakes(Graphics g)
+        {
+            foreach (var otherSnake in this.otherSnakes.Values)
+            {
+                if (otherSnake == null || otherSnake.pos == null)
+                {
+                    continue;
+                }
+
+                // update each parts
+                foreach (PlayerPositionData part in otherSnake.pos)
+                {
+                    this.drawSnakePart(g, string.IsNullOrWhiteSpace(otherSnake.color) ? "Red" : otherSnake.color, part);
+                }
+            }
+        }
+
+        /// <summary>
+        /// draw one snake part
+        /// </summary>
+        /// <param name="snakeColor">the color of the snake</param>
+        /// <param name="part">the part of the snake to draw</param>
+        /// <exception cref="NotImplementedException"></exception>
+        private void drawSnakePart(Graphics g, string snakeColor, PlayerPositionData part)
+        {
+            Rectangle rect = new Rectangle(part.x, part.y, 10, 10);
+
+            // draw a "filled" rectangle to represent the snake part at its coordinates
+            g.FillRectangle(new SolidBrush(Color.FromName(snakeColor)), rect);
+            // draw a border around the snake part
+            g.DrawRectangle(Pens.Black, rect);
+        }
+
+        /// <summary>
+        /// check for collission with wall, other snakes, oneself
+        /// </summary>
+        public bool checkForCollision()
+        {
+            // check for collsison with oneself
+            for (var i = 4; i < this.snake.Count; i++)
+            {
+                if (this.snake.ElementAt(i).x == this.snake.ElementAt(0).x && this.snake.ElementAt(i).y == this.snake.ElementAt(0).y)
+                {
+                    return true;
+                }
+            }
+            // check for collisions with other players
+            if (checkForCollisionWithOtherSnakes())
+            {
+                return true;
+            }
+
+            // check for collission with wall
+            bool hitLeftWall = this.snake.ElementAt(0).x < 0;
+            bool hitRightWall = this.snake.ElementAt(0).x > Constants.SNAKEBOARD_MAX_X - 10;
+            bool hitTopWall = this.snake.ElementAt(0).y < 0;
+            bool hitBottomWall = this.snake.ElementAt(0).y > Constants.SNAKEBOARD_MAX_Y - 10;
+            return hitLeftWall || hitRightWall || hitTopWall || hitBottomWall;
+        }
+
+        /// <summary>
+        /// Draw the snake on the picture box
+        /// </summary>
+        /// <param name="g">the graphics object of the picture box</param>
+        public void drawSnake(Graphics g)
+        {
+            foreach (PlayerPositionData part in this.snake)
+            {
+                this.drawSnakePart(g, this.color, part);
+            }
+        }
+
+        /// <summary>
+        /// move the snake
+        /// </summary>
+        public void moveSnake()
+        {
+            // create the new Snake's head, based on snake move delta
+            PlayerPositionData head = new PlayerPositionData(this.snake.ElementAt(0).x + deltaX, this.snake.ElementAt(0).y + deltaY);
+
+            // add the new head to the beginning of snake body
+            this.snake.Insert(0, head);
+
+            // did we ate food?
+            bool ateFood = this.foodManager.hasEatenFood();
+
+            if (ateFood)
+            {
+                // handle collection of food and get the count, how many parts must be added
+                int count = Utils.foodLevelToCount(this.foodManager.handleFoodCollect()) - 1;
+
+                if (count < 0)
+                {
+                    // we need to remove parts
+                    for (var i = 0; i > count; i--)
+                    {
+                        // but if the snake has just a length of 1, we don't remove more
+                        if (this.snake.Count == 1) break;
+                        snake.RemoveAt(this.snake.Count - 1);
+                    }
+                }
+                else
+                {
+                    // we need to add parts, so add the count to our wait count so the end will stop
+                    // and wait until the var is zero again
+                    this.tailWaitCount += count;
+                }
+
+                count++;
+
+                // show the player, how many points he got/lost
+                if (count > 0)
+                {
+                    _ = this.mainForm.sendInfo("+" + count, 1000, "LimeGreen");
+                }
+                else if (count == 0)
+                {
+                    _ = this.mainForm.sendInfo("0", 1000);
+                }
+                else if (count < 0)
+                {
+                    _ = this.mainForm.sendInfo(count.ToString(), 1000, "Red");
+                }
+            }
+            else if (this.tailWaitCount <= 0)
+            {
+                // remove the last part of snake body
+                snake.RemoveAt(this.snake.Count - 1);
+            }
+            else
+            {
+                this.tailWaitCount--;
+            }
+        }
+
+        public void onKeyDown(Keys key)
+        {
+            // prevent the snake from reversing
+            if (this.changingDirection)
+            {
+                return;
+            }
+
+            this.changingDirection = true;
+
+            bool goingUp = deltaY == -10;
+            bool goingDown = deltaY == 10;
+            bool goingRight = deltaX == 10;
+            bool goingLeft = deltaX == -10;
+
+            // change direction based on pressed key
+            this.changeDirection(((key == Keys.Up) || (key == Keys.W)) && !goingDown,
+                ((key == Keys.Left) || (key == Keys.A)) && !goingRight,
+                ((key == Keys.Down) || (key == Keys.S)) && !goingUp,
+                ((key == Keys.Right) || (key == Keys.D)) && !goingLeft);
+
+            // retry
+            if (key == Keys.Enter || key == Keys.R)
+            {
+                this.mainForm.onRetry();
+            }
+        }
+
+        /// <summary>
+        /// change the "walking" direction of the snake
+        /// </summary>
+        /// <param name="up">the snake should go up</param>
+        /// <param name="left">the snake should go left</param>
+        /// <param name="down">the snake should go down</param>
+        /// <param name="right">the snake should go right</param>
+        private void changeDirection(bool up, bool left, bool down, bool right)
+        {
+            // going up
+            if (up)
+            {
+                deltaX = 0;
+                deltaY = -10;
+            }
+            // going left
+            else if (left)
+            {
+                deltaX = -10;
+                deltaY = 0;
+            }
+            // going down
+            else if (down)
+            {
+                deltaX = 0;
+                deltaY = 10;
+            }
+            // going right
+            else if (right)
+            {
+                deltaX = 10;
+                deltaY = 0;
+            }
         }
     }
 }

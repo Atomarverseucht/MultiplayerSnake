@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace MultiplayerSnake.database.data
 {
@@ -17,6 +18,6 @@ namespace MultiplayerSnake.database.data
         /// <summary>
         /// the current position list of the player
         /// </summary>
-        public ConcurrentBag<PlayerPositionData> pos { get; set; }
+        public List<PlayerPositionData> pos { get; set; }
     }
 }

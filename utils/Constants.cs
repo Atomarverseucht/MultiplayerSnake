@@ -65,6 +65,11 @@ namespace MultiplayerSnake.Database
         public const string FIREBASE_PLAYER_VERIFY_NAME_KEY = FIREBASE_PLAYER_KEY + "/verifyName";
 
         /// <summary>
+        /// the background of the picture box
+        /// </summary>
+        public const string BOARD_BACKGROUND = "LightGray";
+
+        /// <summary>
         /// All snake colors available
         /// </summary>
         public static readonly string[] COLORS = {"Aqua", "Yellow", "Red", "Black", "White", "DeepPink", "LawnGreen", "Orange",

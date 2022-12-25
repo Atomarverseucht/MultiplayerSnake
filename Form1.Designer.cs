@@ -35,6 +35,7 @@
             this.tmUpdate = new System.Windows.Forms.Timer(this.components);
             this.lbUhr = new System.Windows.Forms.Label();
             this.lbSidebar = new TheArtOfDev.HtmlRenderer.WinForms.HtmlLabel();
+            this.lbScore = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).BeginInit();
             this.SuspendLayout();
             // 
@@ -61,13 +62,14 @@
             // btnRetry
             // 
             this.btnRetry.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRetry.Location = new System.Drawing.Point(9, 426);
+            this.btnRetry.Location = new System.Drawing.Point(16, 426);
             this.btnRetry.Name = "btnRetry";
             this.btnRetry.Size = new System.Drawing.Size(75, 23);
             this.btnRetry.TabIndex = 4;
-            this.btnRetry.Text = "Retry";
+            this.btnRetry.Text = "Retry (r)";
             this.btnRetry.UseVisualStyleBackColor = true;
             this.btnRetry.Visible = false;
+            this.btnRetry.Click += new System.EventHandler(this.btnRetry_Click);
             // 
             // tmUpdate
             // 
@@ -83,7 +85,7 @@
             // 
             // lbSidebar
             // 
-            this.lbSidebar.BackColor = System.Drawing.SystemColors.Control;
+            this.lbSidebar.BackColor = System.Drawing.Color.Transparent;
             this.lbSidebar.BaseStylesheet = null;
             this.lbSidebar.Location = new System.Drawing.Point(12, 59);
             this.lbSidebar.Name = "lbSidebar";
@@ -92,11 +94,23 @@
             this.lbSidebar.TabStop = false;
             this.lbSidebar.Text = "Sidebar";
             // 
+            // lbScore
+            // 
+            this.lbScore.AutoSize = true;
+            this.lbScore.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbScore.Location = new System.Drawing.Point(12, 399);
+            this.lbScore.Name = "lbScore";
+            this.lbScore.Size = new System.Drawing.Size(60, 24);
+            this.lbScore.TabIndex = 8;
+            this.lbScore.Text = "Score";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(834, 461);
+            this.Controls.Add(this.lbScore);
             this.Controls.Add(this.lbSidebar);
             this.Controls.Add(this.lbUhr);
             this.Controls.Add(this.btnRetry);
@@ -121,6 +135,7 @@
         private System.Windows.Forms.Timer tmUpdate;
         private System.Windows.Forms.Label lbUhr;
         private TheArtOfDev.HtmlRenderer.WinForms.HtmlLabel lbSidebar;
+        private System.Windows.Forms.Label lbScore;
     }
 }
 

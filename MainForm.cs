@@ -8,6 +8,10 @@ using MultiplayerSnake.game;
 using System.Threading.Tasks;
 using MultiplayerSnake.utils;
 using MultiplayerSnake.database.data;
+using System.Diagnostics;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using System.Drawing.Drawing2D;
+using System.Xml.Linq;
 
 namespace MultiplayerSnake
 {
@@ -40,14 +44,22 @@ namespace MultiplayerSnake
         // is the game already ended?
         private bool isGameEnded = false;
 
+        // the scaling of the picturebox graphics object
+        private float scalingX = 1;
+        private float scalingY = 1;
+
         public MainForm()
         {
             InitializeComponent();
             // allow to go in fullscreen with f11
             fullScreen = new FullScreen(this);
             KeyPreview = true;
+            PreviewKeyDown += (sender, e) => e.IsInputKey = true;
+            KeyDown += MainForm_KeyDown;
 
             this.resizeSnakeboard(this);
+
+            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
@@ -102,8 +114,9 @@ namespace MultiplayerSnake
                 (control.Size.Height - snakeboardCalculatedHeight) / 2
             );
             // set scale multiplier for x and y
-            //pbGame.Scale((float)snakeboardCalculatedWidth / snakeboardMaxX, (float)snakeboardCalculatedHeight / snakeboardMaxY);
-            pbGame.BackColor = Color.Black;
+            this.scalingX = (float)snakeboardCalculatedWidth / Constants.SNAKEBOARD_MAX_X;
+            this.scalingY = (float)snakeboardCalculatedHeight / Constants.SNAKEBOARD_MAX_Y;
+            pbGame.BackColor = Color.FromName(Constants.BOARD_BACKGROUND);
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -143,7 +156,7 @@ namespace MultiplayerSnake
 
             // start the main loop, when this method ended execution
             this.updateRequested = true;
-            this.pbGame.Invalidate();
+            _ = this.loop();
 
             this.startGame();
             
@@ -175,6 +188,8 @@ namespace MultiplayerSnake
         /// </summary>
         public async Task startCountdown()
         {
+            lbStatus.ForeColor = Color.Black;
+
             while (true)
             {
                 this.countdown--;
@@ -227,16 +242,36 @@ namespace MultiplayerSnake
 
             this.updateRequested = false;
 
-            // call the main loop that will invalidate the picturebox which calls this method again
-            _ = this.loop(e.Graphics);
+            // tick the game with the graphics object
+            this.tick(e.Graphics);
+
+            
         }
 
         /// <summary>
         /// the game/main loop.
         /// </summary>
-        /// <param name="g">the graphics object of the picturebox</param>
-        public async Task loop(Graphics g)
+        public async Task loop()
         {
+            while (true)
+            {
+                await Task.Delay(50);
+
+                this.updateRequested = true;
+                pbGame.Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// tick the game
+        /// </summary>
+        /// <param name="g">the graphics object of the picturebox</param>
+        public void tick(Graphics g)
+        {
+            // set the coordinate system size
+            g.ScaleTransform(this.scalingX, this.scalingY);
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
             // the current time
             long timeNow = Utils.currentTimeMillis();
             // the time estimated since last update
@@ -248,58 +283,86 @@ namespace MultiplayerSnake
                 var timeTooLong = timeEstimated - Constants.SNAKE_UPDATE_DELAY;
 
                 // the count, how often we have to call the tick method, based on the time, we were waiting too long, at least one time
-                int loopCount = Math.Max(1, (int)Math.Round((double) timeTooLong / Constants.SNAKE_UPDATE_DELAY));
+                int loopCount = Math.Max(1, (int)Math.Round((double)timeTooLong / Constants.SNAKE_UPDATE_DELAY));
 
                 for (int i = 0; i < loopCount; i++)
                 {
                     // tick the game
                     this.playerManager.changingDirection = false;
-                    await this.tick(g);
+                    if (this.countdown != 0)
+                    {
+                        // wait for countdown finsih
+                    }
+                    else if (this.isGameEnded || this.playerManager.snake.Count <= 0 || this.playerManager.checkForCollision())
+                    {
+                        // game ended for us
+                        // first call, then call onGameEnd()
+                        if (!this.isGameEnded) this.onGameEnd();
+                    }
+                    else
+                    {
+                        // we are still in
+                        // move the snake (change values in array, and handle key presses)
+                        this.playerManager.moveSnake();
+                    }
                 }
 
                 // send playerdata just once after the for loop, if snake is set
-                if (this.playerManager.snake.Count != 0) this.playerManager.setPlayerData(this.playerManager.snake);
+                if (this.playerManager.snake.Count != 0) this.firebase.setPlayerData(this.playerManager.snake);
+                
 
                 // set the last update time to now
                 timeLastGraphicsUpdate = Utils.currentTimeMillis();
             }
 
-            await Task.Delay(1);
-            this.updateRequested = true;
-            pbGame.Invalidate();
+            this.updateSideBar();
+
+            // we always need to draw in the graphics, so if somethings is there, it will be shown
+            this.playerManager.handleOtherSnakes(g);
+            this.playerManager.drawSnake(g);
+            this.foodManager.drawFoods(g);
         }
 
         /// <summary>
-        /// tick the game
+        /// 
         /// </summary>
-        /// <param name="g">the graphics object of the picturebox</param>
-        public async Task tick(Graphics g)
+        public void onGameEnd()
         {
-            this.updateSideBar();
+            this.isGameEnded = true;
 
-            //this.clearBoard(g);
-            //this.foodManager.drawFoods(g);
-            //this.playerManager.handleOtherSnakes(g);
+            // remove our snake from the board
+            this.firebase.setPlayerData(null);
+            // drop random food from out snake
+            this.foodManager.dropRandomFood();
+            this.playerManager.snake.Clear();
 
-            //if (this.countdown != 0)
-            //{
-            //    // wait for countdown finsih
-            //}
-            //else if (this.isGameEnded || this.playerManager.snake.length <= 0 || this.playerManager.checkForCollision())
-            //{
-            //    // game ended for us
-            //    // first call, then call onGameEnd()
-            //    if (!this.isGameEnded) this.onGameEnd();
-            //}
-            //else
-            //{
-            //    // we are still in
-            //    // move the snake (change values in array, and handle key presses)
-            //    this.playerManager.moveSnake();
-            //}
+            // show game over message
+            lbStatus.ForeColor = Color.Red;
+            lbStatus.Text = "Game Over!";
 
-            //// we always need to draw the snake, so if it's there, it will be shown
-            //this.playerManager.drawSnake(g);
+            // show retry button and last score
+            btnRetry.Show();
+            lbScore.Show();
+            lbScore.Text = "Your Score: " + this.playerManager.lastScore;
+        }
+
+        /// <summary>
+        /// called when the retry button is clicked or when 'ENTER' or 'R' is pressed
+        /// </summary>
+        public void onRetry()
+        {
+            // if the player isn't alive, restart
+            if (isGameEnded)
+            {
+                lbScore.Hide();
+                btnRetry.Hide();
+                startGame();
+            }
+        }
+
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            this.playerManager.onKeyDown(e.KeyCode);
         }
 
         /// <summary>
@@ -311,9 +374,6 @@ namespace MultiplayerSnake
         /// <returns></returns>
         public async Task sendInfo(string str, int duration, string color = "Black")
         {
-            // show
-            lbStatus.Show();
-
             // set text and color
             lbStatus.ForeColor = Color.FromName(color);
             lbStatus.Text = str;
@@ -323,7 +383,7 @@ namespace MultiplayerSnake
             // hide, if the innerHTML is still the given string and color
             if (lbStatus.Text.Equals(str) && lbStatus.ForeColor.Name.Equals(Color.FromName(color).Name))
             {
-                lbStatus.Hide();
+                lbStatus.Text = "";
             }
         }
 
@@ -343,7 +403,7 @@ namespace MultiplayerSnake
                     continue;
                 }
 
-                int score = playerData.pos == null ? -5 : playerData.pos.Count - 5;
+                int score = playerData.pos == null ? -5 : playerData.pos.Count() - 5;
 
                 this.playerManager.lastScore =
                     score >= 0 && playerName == this.playerManager.name
@@ -421,6 +481,11 @@ namespace MultiplayerSnake
         {
             //updateBarChart(lbSidebar.CreateGraphics());
             
+        }
+
+        private void btnRetry_Click(object sender, EventArgs e)
+        {
+            this.onRetry();
         }
     }
 }
