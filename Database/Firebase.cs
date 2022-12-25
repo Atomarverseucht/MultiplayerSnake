@@ -141,7 +141,10 @@ namespace MultiplayerSnake
         /// </summary>
         public void updateFoods()
         {
-            this.put(Constants.FIREBASE_FOODS_KEY, this.foodManager.foods);
+            lock (this.foodManager.foods)
+            {
+                this.put(Constants.FIREBASE_FOODS_KEY, this.foodManager.foods, true);
+            }
         }
 
         /// <summary>
@@ -177,16 +180,22 @@ namespace MultiplayerSnake
                 if (snapshot.EventType == FirebaseEventType.Delete)
                 {
                     // remove the food from the list
-                    this.foodManager.foods.RemoveAt(key);
-                }
-                else
-                {
-                    // add the food to the list
-                    if (this.foodManager.foods.Count > key && this.foodManager.foods[key] != null)
+                    lock (this.foodManager.foods)
                     {
                         this.foodManager.foods.RemoveAt(key);
                     }
-                    this.foodManager.foods.Insert(key, snapshot.Object);
+                }
+                else
+                {
+                    lock (this.foodManager.foods)
+                    {
+                        // add the food to the list
+                        if (this.foodManager.foods.Count > key && this.foodManager.foods[key] != null)
+                        {
+                            this.foodManager.foods.RemoveAt(key);
+                        }
+                        this.foodManager.foods.Insert(key, snapshot.Object);
+                    }
                 }
 
                 // if first run, signal main thread to continue

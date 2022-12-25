@@ -61,7 +61,10 @@ namespace MultiplayerSnake.game
         /// <param name="foodData">the food data to save</param>
         public void addFood(FoodsData foodData)
         {
-            this.foods.Add(foodData);
+            lock (this.foods)
+            {
+                this.foods.Add(foodData);
+            }
         }
 
         /// <summary>
@@ -95,7 +98,10 @@ namespace MultiplayerSnake.game
             }
 
             // update the food array
-            this.foods = newFoods;
+            lock (this.foods)
+            {
+                this.foods = newFoods;
+            }
             this.firebase.updateFoods();
 
             return foodLevel;
@@ -180,11 +186,14 @@ namespace MultiplayerSnake.game
         /// <param name="g"></param>
         public void drawFoods(Graphics g)
         {
-            foreach (FoodsData food in this.foods)
+            lock (this.foods)
             {
-                Rectangle rect = new Rectangle(food.x, food.y, 10, 10);
-                g.FillRectangle(new SolidBrush(this.currentFoodLightness(Utils.getFoodColorByLevel(food.level))), rect);
-                g.DrawRectangle(Pens.Black, rect);
+                foreach (FoodsData food in this.foods)
+                {
+                    Rectangle rect = new Rectangle(food.x, food.y, 10, 10);
+                    g.FillRectangle(new SolidBrush(this.currentFoodLightness(Utils.getFoodColorByLevel(food.level))), rect);
+                    g.DrawRectangle(Pens.Black, rect);
+                }
             }
 
             // increase lightness
@@ -229,44 +238,47 @@ namespace MultiplayerSnake.game
         /// <returns>the level of the removed food</returns>
         public int handleFoodCollect()
         {
-            // removing old food
-            int removedOldFoodLevel = this.removeFood(this.playerManager.snake[0].x, this.playerManager.snake[0].y);
-
-            // creating new food
-            int foodCount = Math.Max(1, (int)Math.Round(this.playerManager.getActivePlayers() / 2.0));
-            foodCount = foodCount - this.foods.Count;
-
-            for (var i = 0; i < foodCount; i++)
+            lock (this.foods)
             {
-                FoodsData randomFood = null;
-                bool noFoodPosFound = true;
+                // removing old food
+                int removedOldFoodLevel = this.removeFood(this.playerManager.snake[0].x, this.playerManager.snake[0].y);
 
-                // search for a food pos, which isn't in use
-                while (noFoodPosFound)
+                // creating new food
+                int foodCount = Math.Max(1, (int)Math.Round(this.playerManager.getActivePlayers() / 2.0));
+                foodCount = foodCount - this.foods.Count;
+
+                for (var i = 0; i < foodCount; i++)
                 {
-                    randomFood = this.genFood();
+                    FoodsData randomFood = null;
+                    bool noFoodPosFound = true;
 
-                    // there are no positions to check
-                    if (this.foods.Count == 0)
-                        noFoodPosFound = false;
-
-                    // check all other food positions to avoid overlap
-                    foreach (FoodsData food in this.foods)
+                    // search for a food pos, which isn't in use
+                    while (noFoodPosFound)
                     {
-                        if (food.x != randomFood.x || food.y != randomFood.y)
-                        {
+                        randomFood = this.genFood();
+
+                        // there are no positions to check
+                        if (this.foods.Count == 0)
                             noFoodPosFound = false;
+
+                        // check all other food positions to avoid overlap
+                        foreach (FoodsData food in this.foods)
+                        {
+                            if (food.x != randomFood.x || food.y != randomFood.y)
+                            {
+                                noFoodPosFound = false;
+                            }
                         }
                     }
+
+                    // and add it
+                    this.addFood(randomFood);
                 }
 
-                // and add it
-                this.addFood(randomFood);
+                this.firebase.updateFoods();
+
+                return removedOldFoodLevel;
             }
-
-            this.firebase.updateFoods();
-
-            return removedOldFoodLevel;
         }
 
         /// <summary>

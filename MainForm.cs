@@ -255,7 +255,7 @@ namespace MultiplayerSnake
         {
             while (true)
             {
-                await Task.Delay(50);
+                await Task.Delay(1);
 
                 this.updateRequested = true;
                 pbGame.Invalidate();
@@ -324,7 +324,7 @@ namespace MultiplayerSnake
         }
 
         /// <summary>
-        /// 
+        /// called when the game ends
         /// </summary>
         public void onGameEnd()
         {
