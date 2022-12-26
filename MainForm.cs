@@ -143,7 +143,10 @@ namespace MultiplayerSnake
             this.playerManager.checkMaxPlayerCount();
 
             // let the user decide, which name he wants to use
-            this.playerManager.chooseName();
+            if (!this.playerManager.chooseName())
+            {
+                return;
+            }
 
             // choose the color
             this.playerManager.chooseRandomColor();
@@ -331,7 +334,7 @@ namespace MultiplayerSnake
             this.isGameEnded = true;
 
             // remove our snake from the board
-            this.firebase.setPlayerData(null);
+            this.firebase.setPlayerData(new List<PlayerPositionData>());
             // drop random food from out snake
             this.foodManager.dropRandomFood();
             this.playerManager.snake.Clear();

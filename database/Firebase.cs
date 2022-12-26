@@ -5,6 +5,7 @@ using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
 using MultiplayerSnake.game;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Input;
 
 namespace MultiplayerSnake
 {
@@ -29,6 +31,9 @@ namespace MultiplayerSnake
 
         // the database client
         private FirebaseClient client;
+
+        // the task currently running to update the database
+        private Task updateTask = Task.CompletedTask;
 
         public Firebase(MainForm mainForm)
         {
@@ -74,9 +79,39 @@ namespace MultiplayerSnake
         {
             try
             {
-                var task = this.client.Child("snake/" + key).PutAsync<T>(value);
-                if (!async)
+                if (async)
+                {
+                    if (this.updateTask == null || this.updateTask.IsCompleted)
+                    {
+                        // when there is no currently running update task, create one
+                        lock (this.updateTask) lock (value)
+                            {
+                                this.updateTask = this.client.Child("snake/" + key).PutAsync<T>(value);
+                            }
+                    }
+                    else
+                    {
+                        lock (this.updateTask)
+                        {
+                            // else, wait for the current one to finish
+                            this.updateTask.ContinueWith(t =>
+                            {
+                                lock (this.updateTask) lock (value)
+                                    {
+                                        this.updateTask = this.client.Child("snake/" + key).PutAsync<T>(value);
+                                    }
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    Task.WaitAll(this.updateTask);
+                    var task = this.client.Child("snake/" + key).PutAsync<T>(value);
                     Task.WaitAll(task);
+                }
+
+                
                 return true;
             }
             catch (Exception ex)
@@ -213,6 +248,7 @@ namespace MultiplayerSnake
                 if (!this.checkVersion(snapshot.Object.version))
                 {
                     Application.Exit();
+                    return;
                 }
 
                 // if first run, signal main thread to continue

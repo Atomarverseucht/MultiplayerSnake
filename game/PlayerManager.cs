@@ -111,7 +111,11 @@ namespace MultiplayerSnake.game
             }
         }
 
-        public void chooseName()
+        /// <summary>
+        /// prompts the user to choose its name
+        /// </summary>
+        /// <returns>if the name prompt was success (not closed by the user)</returns>
+        public bool chooseName()
         {
             this.name = "";
 
@@ -122,7 +126,7 @@ namespace MultiplayerSnake.game
                 if (res == DialogResult.None)
                 {
                     Application.Exit();
-                    return;
+                    return false;
                 }
                 string tempName = InputBox.ResultValue;
                 this.name = tempName == null ? "" : tempName;
@@ -155,6 +159,8 @@ namespace MultiplayerSnake.game
             {
                 this.firebase.delete(Constants.FIREBASE_PLAYER_KEY.Replace("%name%", this.name));
             };
+
+            return true;
         }
 
         /// <summary>
