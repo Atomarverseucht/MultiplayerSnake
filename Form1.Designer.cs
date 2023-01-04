@@ -80,11 +80,13 @@
             // 
             // lbSidebar
             // 
+            this.lbSidebar.AutoSize = false;
+            this.lbSidebar.AutoSizeHeightOnly = true;
             this.lbSidebar.BackColor = System.Drawing.Color.Transparent;
             this.lbSidebar.BaseStylesheet = null;
             this.lbSidebar.Location = new System.Drawing.Point(12, 86);
             this.lbSidebar.Name = "lbSidebar";
-            this.lbSidebar.Size = new System.Drawing.Size(63, 20);
+            this.lbSidebar.Size = new System.Drawing.Size(268, 20);
             this.lbSidebar.TabIndex = 7;
             this.lbSidebar.TabStop = false;
             this.lbSidebar.Text = "Loading...";

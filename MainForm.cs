@@ -12,6 +12,7 @@ using System.Diagnostics;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using System.Drawing.Drawing2D;
 using System.Xml.Linq;
+using Newtonsoft.Json;
 
 namespace MultiplayerSnake
 {
@@ -138,15 +139,15 @@ namespace MultiplayerSnake
 
             // register the firebase listeners. this also performs a version check
             this.firebase.registerFireBaseListeners();
-            
-            // check if the game is already full
-            this.playerManager.checkMaxPlayerCount();
 
             // let the user decide, which name he wants to use
             if (!this.playerManager.chooseName())
             {
                 return;
             }
+
+            // check if the game is already full
+            this.playerManager.checkMaxPlayerCount();
 
             // choose the color
             this.playerManager.chooseRandomColor();
@@ -430,8 +431,7 @@ namespace MultiplayerSnake
                 PlayerData snakeData = this.playerManager.allSnakes[playerName];
 
                 // add the data as html to the score string
-                formattedScore += "<span style=\"color:" + snakeData.color + ";text-shadow: 1px 0 Black, -1px 0 Black, 0 1px Black, 0 -1px Black, 1px 1px Black, -1px -1px Black, -1px 1px Black, 1px -1px Black;\">"
-                + Utils.htmlEntities(playerName) + "</span>: " + (score < -4 ? "Spectator" : score.ToString()) + "<br>";
+                formattedScore += "<div style=\"position: absolute;margin-top: 7px;margin-left: 10px\"><b>" + Utils.htmlEntities(playerName) + "</b>: " + (score < -4 ? "Spectator" : score.ToString()) + "</div><div style=\"position: relative\"><div style=\"font-size: 20px;position: absolute;margin-top: 3.5px;margin-left: 1px;color: " + snakeData.color + ";\">&#x25CF;</div><div style=\"font-size: 26.5px;color: Black;\">&#x25CF;</div></div>";
             }
 
             lbSidebar.Text = "Online: " + this.playerManager.getOnlinePlayers() + "/15<br><br>" + formattedScore;
