@@ -448,10 +448,10 @@ namespace MultiplayerSnake
         /// <param Grafic="g"></param>
         public void updateBarChart(Graphics g)
         {
-            for (int i = 0; i < scores.Count(); i++)
-            {
-                //drawBarChart(g,scores., 40+i*50, this.playerManager.name, Brushes.Blue);
-            }
+            //for (int i = 0; i < scores.Count(); i++)
+            //{
+            //    drawBarChart(g,scores., 40+i*50, this.playerManager.name, Brushes.Blue);
+            //}
         }
         
         // Methods for "updateBarGraph(g)"
