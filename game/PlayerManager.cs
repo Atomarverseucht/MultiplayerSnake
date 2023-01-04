@@ -327,7 +327,7 @@ namespace MultiplayerSnake.game
         {
             foreach (PlayerPositionData part in this.snake)
             {
-                this.drawSnakePart(g, this.color, part);
+                this.drawSnakePart(g, string.IsNullOrWhiteSpace(this.color) ? "Red" : this.color, part);
             }
         }
 

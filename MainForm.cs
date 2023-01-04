@@ -247,8 +247,6 @@ namespace MultiplayerSnake
 
             // tick the game with the graphics object
             this.tick(e.Graphics);
-
-            
         }
 
         /// <summary>
