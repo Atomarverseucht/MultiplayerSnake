@@ -162,8 +162,7 @@ namespace MultiplayerSnake
 
             // then start the main loop
             _ = this.loop();
-            
-            tmUpdate.Start();
+
             this.firstInit = true;
         }
 
@@ -419,7 +418,6 @@ namespace MultiplayerSnake
                 scores.Add(playerName, score);
                 i++;
             }
-            int h=0;
             // loop threw the descending sorted array
             foreach (KeyValuePair<string, int> scoreData in scores.OrderByDescending(keyValuePair => keyValuePair.Value))
             {
@@ -432,56 +430,10 @@ namespace MultiplayerSnake
                 // add the data as html to the score string
                 formattedScore += "<span style=\"color:" + snakeData.color + ";text-shadow: 1px 0 Black, -1px 0 Black, 0 1px Black, 0 -1px Black, 1px 1px Black, -1px -1px Black, -1px 1px Black, 1px -1px Black;\">"
                 + Utils.htmlEntities(playerName) + "</span>: " + (score < -4 ? "Spectator" : score.ToString()) + "<br>";
-
-                //drawBarChart(pictureBox1.CreateGraphics(), score, 40 + h * 50, playerName, snakeData.color);
-                h++;
             }
 
             lbSidebar.Text = "Online: " + this.playerManager.getOnlinePlayers() + "/15<br><br>" + formattedScore;
-        }
-
-        /// <summary>
-        /// Updates bar chart
-        /// </summary>
-        /// <param Grafic="g"></param>
-        public void updateBarChart(Graphics g)
-        {
-            //for (int i = 0; i < scores.Count(); i++)
-            //{
-            //    drawBarChart(g,scores., 40+i*50, this.playerManager.name, Brushes.Blue);
-            //}
-        }
-        
-        // Methods for "updateBarGraph(g)"
-
-        public void drawBarChart(Graphics g, int score, int yposition, string p_name, Brush b)
-        {
-            g.FillRectangle(b, 0, yposition, calculateBar(score), 30);
-
-            //writing
-            if (calculateBar(score) < 10+p_name.Length*5)
-            {
-                g.DrawString(p_name, new Font("Arial", 12), Brushes.Black, 10, yposition + 5);
-            }
-            else
-            {
-                g.DrawString(p_name, new Font("Arial", 12), Brushes.White, 10, yposition+5);
-            }
-           
-        }
-
-        int firstScore;
-
-        public int calculateBar(int score)
-        {
-            return score * 200 / firstScore;
-        }
-        
-        // Timer
-        private void tmUpdate_Tick(object sender, EventArgs e)
-        {
-
-        }
+        } 
 
         private void btnRetry_Click(object sender, EventArgs e)
         {
