@@ -437,7 +437,7 @@ namespace MultiplayerSnake
                 h++;
             }
 
-            lbSidebar.Text = "Online: " + this.playerManager.getOnlinePlayers() + "/15<br><br>"; //+ formattedScore;
+            lbSidebar.Text = "Online: " + this.playerManager.getOnlinePlayers() + "/15<br><br>" + formattedScore;
         }
 
         /// <summary>
@@ -480,13 +480,13 @@ namespace MultiplayerSnake
         // Timer
         private void tmUpdate_Tick(object sender, EventArgs e)
         {
-            updateBarChart(pictureBox1.CreateGraphics());
-            
+
         }
 
         private void btnRetry_Click(object sender, EventArgs e)
         {
             this.onRetry();
         }
+
     }
 }
