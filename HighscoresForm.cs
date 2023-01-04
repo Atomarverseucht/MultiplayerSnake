@@ -15,6 +15,17 @@ namespace MultiplayerSnake
         public HighscoresForm()
         {
             InitializeComponent();
+            Resize += HighscoresForm_Resize;
+            this.HighscoresForm_Resize(null, null);
+        }
+
+        private void HighscoresForm_Resize(object sender, EventArgs e)
+        {
+            pnScroll.Width = this.Width - 16;
+            pbHighscores.Width = pnScroll.Size.Width - 17;
+            pnScroll.Height = this.Height - 114;
+
+            pbHighscores.Invalidate();
         }
 
 
@@ -61,7 +72,7 @@ namespace MultiplayerSnake
         {
             int score = 20;
             string color = "red";
-            e.Graphics.Clear(Color.White);
+            e.Graphics.Clear(SystemColors.Control);
             for (int i = 0; i < 10; i++)
             {
                 drawBarChart(e.Graphics, score, i * 50 + 20, Name, new SolidBrush(Color.FromName(color)));

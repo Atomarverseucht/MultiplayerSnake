@@ -33,16 +33,16 @@
             this.btBack = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.timer = new System.Windows.Forms.Timer(this.components);
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.pnScroll = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.pbHighscores)).BeginInit();
-            this.panel1.SuspendLayout();
+            this.pnScroll.SuspendLayout();
             this.SuspendLayout();
             // 
             // pbHighscores
             // 
-            this.pbHighscores.Location = new System.Drawing.Point(0, 3);
+            this.pbHighscores.Location = new System.Drawing.Point(0, 0);
             this.pbHighscores.Name = "pbHighscores";
-            this.pbHighscores.Size = new System.Drawing.Size(785, 834);
+            this.pbHighscores.Size = new System.Drawing.Size(368, 834);
             this.pbHighscores.TabIndex = 0;
             this.pbHighscores.TabStop = false;
             this.pbHighscores.Paint += new System.Windows.Forms.PaintEventHandler(this.pbHighscores_Paint);
@@ -50,7 +50,7 @@
             // btBack
             // 
             this.btBack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btBack.Location = new System.Drawing.Point(12, 415);
+            this.btBack.Location = new System.Drawing.Point(12, 318);
             this.btBack.Name = "btBack";
             this.btBack.Size = new System.Drawing.Size(75, 23);
             this.btBack.TabIndex = 1;
@@ -75,28 +75,34 @@
             this.timer.Enabled = true;
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
-            // panel1
+            // pnScroll
             // 
-            this.panel1.AutoScroll = true;
-            this.panel1.Controls.Add(this.pbHighscores);
-            this.panel1.Location = new System.Drawing.Point(0, 37);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(785, 372);
-            this.panel1.TabIndex = 3;
+            this.pnScroll.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnScroll.AutoScroll = true;
+            this.pnScroll.BackColor = System.Drawing.SystemColors.Control;
+            this.pnScroll.Controls.Add(this.pbHighscores);
+            this.pnScroll.Location = new System.Drawing.Point(0, 34);
+            this.pnScroll.Name = "pnScroll";
+            this.pnScroll.Size = new System.Drawing.Size(534, 278);
+            this.pnScroll.TabIndex = 3;
             // 
             // HighscoresForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.panel1);
+            this.BackColor = System.Drawing.SystemColors.Control;
+            this.ClientSize = new System.Drawing.Size(534, 353);
+            this.Controls.Add(this.pnScroll);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btBack);
+            this.MinimumSize = new System.Drawing.Size(550, 392);
             this.Name = "HighscoresForm";
             this.Text = "Highscores";
             this.Load += new System.EventHandler(this.HighscoresForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pbHighscores)).EndInit();
-            this.panel1.ResumeLayout(false);
+            this.pnScroll.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -108,6 +114,6 @@
         private System.Windows.Forms.Button btBack;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Timer timer;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel pnScroll;
     }
 }
