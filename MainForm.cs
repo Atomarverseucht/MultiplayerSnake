@@ -163,8 +163,7 @@ namespace MultiplayerSnake
 
             // then start the main loop
             _ = this.loop();
-            
-            tmUpdate.Start();
+
             this.firstInit = true;
         }
 
@@ -422,7 +421,6 @@ namespace MultiplayerSnake
                 scores.Add(playerName, score);
                 i++;
             }
-            int h=0;
             // loop threw the descending sorted array
             foreach (KeyValuePair<string, int> scoreData in scores.OrderByDescending(keyValuePair => keyValuePair.Value))
             {
@@ -434,63 +432,20 @@ namespace MultiplayerSnake
 
                 // add the data as html to the score string
                 formattedScore += "<div style=\"position: absolute;margin-top: 7px;margin-left: 10px\"><b>" + Utils.htmlEntities(playerName) + "</b>: " + (score < -4 ? "Spectator" : score.ToString()) + "</div><div style=\"position: relative\"><div style=\"font-size: 20px;position: absolute;margin-top: 3.5px;margin-left: 1px;color: " + snakeData.color + ";\">&#x25CF;</div><div style=\"font-size: 26.5px;color: Black;\">&#x25CF;</div></div>";
-
-                //formattedScore += "<span style=\"border: 1px solid black;background-color: " + snakeData.color + ";height: 100px;width: 100px;border-radius:10px;display: inline-block;\"></span>"
-                //    + "<b>" + Utils.htmlEntities(playerName) + "</b>: " + (score < -4 ? "Spectator" : score.ToString()) + "<br>";
-
-                //drawBarChart(pictureBox1.CreateGraphics(), score, 40 + h * 50, playerName, snakeData.color);
-                h++;
             }
 
             lbSidebar.Text = "Online: " + this.playerManager.getOnlinePlayers() + "/15<br><br>" + formattedScore;
-        }
-
-        /// <summary>
-        /// Updates bar chart
-        /// </summary>
-        /// <param Grafic="g"></param>
-        public void updateBarChart(Graphics g)
-        {
-            //for (int i = 0; i < scores.Count(); i++)
-            //{
-            //    drawBarChart(g,scores., 40+i*50, this.playerManager.name, Brushes.Blue);
-            //}
-        }
-        
-        // Methods for "updateBarGraph(g)"
-
-        public void drawBarChart(Graphics g, int score, int yposition, string p_name, Brush b)
-        {
-            g.FillRectangle(b, 0, yposition, calculateBar(score), 30);
-
-            //writing
-            if (calculateBar(score) < 10+p_name.Length*5)
-            {
-                g.DrawString(p_name, new Font("Arial", 12), Brushes.Black, 10, yposition + 5);
-            }
-            else
-            {
-                g.DrawString(p_name, new Font("Arial", 12), Brushes.White, 10, yposition+5);
-            }
-           
-        }
-
-        int firstScore;
-
-        public int calculateBar(int score)
-        {
-            return score * 200 / firstScore;
-        }
-        
-        // Timer
-        private void tmUpdate_Tick(object sender, EventArgs e)
-        {
-
-        }
+        } 
 
         private void btnRetry_Click(object sender, EventArgs e)
         {
             this.onRetry();
+        }
+
+        private void btnHighscores_Click(object sender, EventArgs e)
+        {
+            HighscoresForm highscoresForm = new HighscoresForm();
+            highscoresForm.Show();
         }
     }
 }

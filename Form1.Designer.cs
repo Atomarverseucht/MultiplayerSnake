@@ -28,11 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.pbGame = new System.Windows.Forms.PictureBox();
             this.lbStatus = new System.Windows.Forms.Label();
             this.btnRetry = new System.Windows.Forms.Button();
-            this.tmUpdate = new System.Windows.Forms.Timer(this.components);
             this.lbUhr = new System.Windows.Forms.Label();
             this.lbSidebar = new TheArtOfDev.HtmlRenderer.WinForms.HtmlLabel();
             this.lbScore = new System.Windows.Forms.Label();
@@ -71,10 +69,6 @@
             this.btnRetry.UseVisualStyleBackColor = true;
             this.btnRetry.Visible = false;
             this.btnRetry.Click += new System.EventHandler(this.btnRetry_Click);
-            // 
-            // tmUpdate
-            // 
-            this.tmUpdate.Tick += new System.EventHandler(this.tmUpdate_Tick);
             // 
             // lbUhr
             // 
@@ -119,6 +113,7 @@
             this.btnHighscores.Text = "Highscores";
             this.btnHighscores.UseVisualStyleBackColor = true;
             this.btnHighscores.Visible = false;
+            this.btnHighscores.Click += new System.EventHandler(this.btnHighscores_Click);
             // 
             // MainForm
             // 
@@ -149,7 +144,6 @@
         private System.Windows.Forms.PictureBox pbGame;
         private System.Windows.Forms.Label lbStatus;
         private System.Windows.Forms.Button btnRetry;
-        private System.Windows.Forms.Timer tmUpdate;
         private System.Windows.Forms.Label lbUhr;
         private TheArtOfDev.HtmlRenderer.WinForms.HtmlLabel lbSidebar;
         private System.Windows.Forms.Label lbScore;
