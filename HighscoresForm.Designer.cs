@@ -33,16 +33,19 @@
             this.btBack = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.timer = new System.Windows.Forms.Timer(this.components);
+            this.panel1 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.pbHighscores)).BeginInit();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // pbHighscores
             // 
-            this.pbHighscores.Location = new System.Drawing.Point(2, 47);
+            this.pbHighscores.Location = new System.Drawing.Point(0, 3);
             this.pbHighscores.Name = "pbHighscores";
-            this.pbHighscores.Size = new System.Drawing.Size(796, 353);
+            this.pbHighscores.Size = new System.Drawing.Size(785, 834);
             this.pbHighscores.TabIndex = 0;
             this.pbHighscores.TabStop = false;
+            this.pbHighscores.Paint += new System.Windows.Forms.PaintEventHandler(this.pbHighscores_Paint);
             // 
             // btBack
             // 
@@ -70,20 +73,30 @@
             // timer
             // 
             this.timer.Enabled = true;
-            this.timer.Interval = 1000;
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
+            // 
+            // panel1
+            // 
+            this.panel1.AutoScroll = true;
+            this.panel1.Controls.Add(this.pbHighscores);
+            this.panel1.Location = new System.Drawing.Point(0, 37);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(785, 372);
+            this.panel1.TabIndex = 3;
             // 
             // HighscoresForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btBack);
-            this.Controls.Add(this.pbHighscores);
             this.Name = "HighscoresForm";
             this.Text = "Highscores";
+            this.Load += new System.EventHandler(this.HighscoresForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pbHighscores)).EndInit();
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -95,5 +108,6 @@
         private System.Windows.Forms.Button btBack;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Timer timer;
+        private System.Windows.Forms.Panel panel1;
     }
 }

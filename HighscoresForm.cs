@@ -50,11 +50,21 @@ namespace MultiplayerSnake
 
         private void timer_Tick(object sender, EventArgs e)
         {
+        }
+
+        private void HighscoresForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pbHighscores_Paint(object sender, PaintEventArgs e)
+        {
             int score = 20;
             string color = "red";
+            e.Graphics.Clear(Color.White);
             for (int i = 0; i < 10; i++)
             {
-                drawBarChart(pbHighscores.CreateGraphics(), score, i*50+20, Name , new SolidBrush(Color.FromName(color)));
+                drawBarChart(e.Graphics, score, i * 50 + 20, Name, new SolidBrush(Color.FromName(color)));
             }
         }
     }
