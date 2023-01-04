@@ -42,7 +42,7 @@
             // 
             this.pbHighscores.Location = new System.Drawing.Point(0, 3);
             this.pbHighscores.Name = "pbHighscores";
-            this.pbHighscores.Size = new System.Drawing.Size(785, 834);
+            this.pbHighscores.Size = new System.Drawing.Size(767, 834);
             this.pbHighscores.TabIndex = 0;
             this.pbHighscores.TabStop = false;
             this.pbHighscores.Paint += new System.Windows.Forms.PaintEventHandler(this.pbHighscores_Paint);

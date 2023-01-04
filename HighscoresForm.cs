@@ -59,7 +59,7 @@ namespace MultiplayerSnake
 
         private void pbHighscores_Paint(object sender, PaintEventArgs e)
         {
-            int score = 20;
+            int score = 100;
             string color = "red";
             e.Graphics.Clear(Color.White);
             for (int i = 0; i < 10; i++)
