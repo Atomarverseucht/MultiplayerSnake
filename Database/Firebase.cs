@@ -269,12 +269,27 @@ namespace MultiplayerSnake
                 string key = snapshot.Key;
                 PlayerData playerData = snapshot.Object;
 
+                // the database doesn't tell us, if the whole player key got deleted or just parts of it
+                // so we need to query the database for updates
+                bool found = true;
+                if (snapshot.EventType == FirebaseEventType.Delete)
+                {
+                    found = !string.IsNullOrEmpty(this.queryOnce<string>("players/" + key + "/color"));
+                }
+
                 // check if we even have player data
-                if (snapshot.EventType == FirebaseEventType.Delete || playerData == null)
+                if (!found || playerData == null)
                 {
                     // remove the player
                     this.playerManager.allSnakes.TryRemove(key, out var ignored1);
                     this.playerManager.otherSnakes.TryRemove(key, out var ignored2);
+
+                    if (key == this.playerManager.name)
+                    {
+                        this.mainForm.onGameEnd(true);
+                        MessageBox.Show("You were kicked from the game!", "Info");
+                        Application.Exit();
+                    }
 
                     oSignalEvent.Set();
                     return;
@@ -283,11 +298,11 @@ namespace MultiplayerSnake
                 // update all snakes (used to count online (registered) players)
                 this.playerManager.allSnakes[key] = playerData;
 
-                // check if the update data is for us
-                if (key == this.playerManager.name)
+                // check if the update data is for us and the color is not null or empty
+                if (key == this.playerManager.name && string.IsNullOrWhiteSpace(playerData.color))
                 {
                     // then we can set our own color
-                    this.playerManager.color = this.playerManager.allSnakes[this.playerManager.name].color;
+                    this.playerManager.color = playerData.color;
                 }
 
                 // we need to have a seperate dict with only other players

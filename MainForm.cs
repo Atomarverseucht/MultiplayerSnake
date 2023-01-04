@@ -157,11 +157,11 @@ namespace MultiplayerSnake
             // set the last graphics update to now
             this.timeLastGraphicsUpdate = Utils.currentTimeMillis();
 
-            // start the main loop, when this method ended execution
-            this.updateRequested = true;
-            _ = this.loop();
-
+            // prepare for the game to start
             this.startGame();
+
+            // then start the main loop
+            _ = this.loop();
             
             tmUpdate.Start();
             this.firstInit = true;
@@ -256,6 +256,8 @@ namespace MultiplayerSnake
         /// </summary>
         public async Task loop()
         {
+            await Task.Delay(500);
+
             while (true)
             {
                 await Task.Delay(1);
@@ -329,7 +331,7 @@ namespace MultiplayerSnake
         /// <summary>
         /// called when the game ends
         /// </summary>
-        public void onGameEnd()
+        public void onGameEnd(bool kicked=false)
         {
             this.isGameEnded = true;
 
@@ -338,6 +340,9 @@ namespace MultiplayerSnake
             // drop random food from out snake
             this.foodManager.dropRandomFood();
             this.playerManager.snake.Clear();
+
+            if (kicked)
+                return;
 
             // show game over message
             lbStatus.ForeColor = Color.Red;
