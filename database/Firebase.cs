@@ -4,17 +4,12 @@ using Firebase.Database.Streaming;
 using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
 using MultiplayerSnake.game;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Input;
 
 namespace MultiplayerSnake
 {

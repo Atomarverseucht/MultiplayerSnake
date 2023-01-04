@@ -1,22 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MultiplayerSnake
 {
     public partial class HighscoresForm : Form
     {
-        public HighscoresForm()
+        private Dictionary<int, string> scores;
+
+        public HighscoresForm(Dictionary<int, string> scores)
         {
             InitializeComponent();
             Resize += HighscoresForm_Resize;
             this.HighscoresForm_Resize(null, null);
+            this.scores = scores;
+
+
+            int scorePlayer1 = scores.ElementAt(0).Key;
+            string namePlayer1 = scores.ElementAt(0).Value.Split('#')[0];
+            string colorPlayer1 = scores.ElementAt(0).Value.Split('#')[1];
+
+            foreach (KeyValuePair<int, string> score in scores)
+            {
+                int scorePlayer = score.Key;
+                string namePlayer = score.Value.Split('#')[0];
+                string colorPlayer = score.Value.Split('#')[1];
+            }
         }
 
         private void HighscoresForm_Resize(object sender, EventArgs e)
