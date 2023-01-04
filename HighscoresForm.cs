@@ -15,19 +15,7 @@ namespace MultiplayerSnake
             InitializeComponent();
             Resize += HighscoresForm_Resize;
             this.HighscoresForm_Resize(null, null);
-            this.scores = scores;
-
-
-            int scorePlayer1 = scores.ElementAt(0).Key;
-            string namePlayer1 = scores.ElementAt(0).Value.Split('#')[0];
-            string colorPlayer1 = scores.ElementAt(0).Value.Split('#')[1];
-
-            foreach (KeyValuePair<int, string> score in scores)
-            {
-                int scorePlayer = score.Key;
-                string namePlayer = score.Value.Split('#')[0];
-                string colorPlayer = score.Value.Split('#')[1];
-            }
+            this.scores = scores;  
         }
 
         private void HighscoresForm_Resize(object sender, EventArgs e)
@@ -43,17 +31,9 @@ namespace MultiplayerSnake
         // Methods for the BarGraph()
         public void drawBarChart(Graphics g, int score, int yposition, string p_name, Brush b)
         {
-            g.FillRectangle(b, 0, yposition, calculateBar(score), 30);
-
-            //writing
-            if (calculateBar(score) < 10 + p_name.Length * 5)
-            {
-                g.DrawString(p_name, new Font("Arial", 12), Brushes.Black, 10, yposition + 5);
-            }
-            else
-            {
-                g.DrawString(p_name, new Font("Arial", 12), Brushes.White, 10, yposition + 5);
-            }
+            g.DrawString(p_name, new Font("Arial", 12), Brushes.Black, 10, yposition);                                              // displays the name
+            g.FillRectangle(b, 0, yposition+20, calculateBar(score), 5);                                                            // Bargraph
+            g.DrawString(score.ToString(), new Font("Arial", 12), Brushes.DarkGray, calculateBar(score) + 10, yposition + 12);      // displays the score
 
         }
 
@@ -70,23 +50,20 @@ namespace MultiplayerSnake
             this.Close();
         }
 
-        private void timer_Tick(object sender, EventArgs e)
-        {
-        }
-
-        private void HighscoresForm_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void pbHighscores_Paint(object sender, PaintEventArgs e)
-        {
-            int score = 100;
-            string color = "red";
+        {   
+            firstScore = scores.ElementAt(0).Key;
             e.Graphics.Clear(SystemColors.Control);
-            for (int i = 0; i < 10; i++)
+
+            // Calls the function drawBarChart()
+           int i = 0;
+            foreach (KeyValuePair<int, string> score in scores)
             {
-                drawBarChart(e.Graphics, score, i * 50 + 20, Name, new SolidBrush(Color.FromName(color)));
+                int scorePlayer = score.Key;
+                string namePlayer = score.Value.Split('#')[0];
+                string colorPlayer = score.Value.Split('#')[1];
+                drawBarChart(e.Graphics, scorePlayer, i * 50 + 20, namePlayer, new SolidBrush(Color.FromName(colorPlayer)));
+                i++;
             }
         }
     }
