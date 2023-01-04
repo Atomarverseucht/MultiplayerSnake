@@ -36,7 +36,9 @@
             this.lbUhr = new System.Windows.Forms.Label();
             this.lbSidebar = new TheArtOfDev.HtmlRenderer.WinForms.HtmlLabel();
             this.lbScore = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // pbGame
@@ -106,12 +108,21 @@
             this.lbScore.Text = "Score";
             this.lbScore.Visible = false;
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(11, 85);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(270, 297);
+            this.pictureBox1.TabIndex = 9;
+            this.pictureBox1.TabStop = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(834, 461);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.lbScore);
             this.Controls.Add(this.lbSidebar);
             this.Controls.Add(this.lbUhr);
@@ -124,6 +135,7 @@
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -138,6 +150,7 @@
         private System.Windows.Forms.Label lbUhr;
         private TheArtOfDev.HtmlRenderer.WinForms.HtmlLabel lbSidebar;
         private System.Windows.Forms.Label lbScore;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 

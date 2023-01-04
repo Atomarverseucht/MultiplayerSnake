@@ -398,7 +398,7 @@ namespace MultiplayerSnake
         // update side status bar
         public void updateSideBar()
         {
-            Dictionary<string, int> scores = new Dictionary<string, int>(); // merge conflict
+            Dictionary<string, int> scores = new Dictionary<string, int>();
             string formattedScore = "";
 
             int i = 0;
@@ -421,7 +421,7 @@ namespace MultiplayerSnake
                 scores.Add(playerName, score);
                 i++;
             }
-
+            int h=0;
             // loop threw the descending sorted array
             foreach (KeyValuePair<string, int> scoreData in scores.OrderByDescending(keyValuePair => keyValuePair.Value))
             {
@@ -434,9 +434,12 @@ namespace MultiplayerSnake
                 // add the data as html to the score string
                 formattedScore += "<span style=\"color:" + snakeData.color + ";text-shadow: 1px 0 Black, -1px 0 Black, 0 1px Black, 0 -1px Black, 1px 1px Black, -1px -1px Black, -1px 1px Black, 1px -1px Black;\">"
                 + Utils.htmlEntities(playerName) + "</span>: " + (score < -4 ? "Spectator" : score.ToString()) + "<br>";
+
+                //drawBarChart(pictureBox1.CreateGraphics(), score, 40 + h * 50, playerName, snakeData.color);
+                h++;
             }
 
-            lbSidebar.Text = "Online: " + this.playerManager.getOnlinePlayers() + "/15<br><br>" + formattedScore;
+            lbSidebar.Text = "Online: " + this.playerManager.getOnlinePlayers() + "/15<br><br>"; //+ formattedScore;
         }
 
         /// <summary>
@@ -445,18 +448,10 @@ namespace MultiplayerSnake
         /// <param Grafic="g"></param>
         public void updateBarChart(Graphics g)
         {
-            List<int> scores = new List<int>() {2,46,42,79 };
-            scores.Add(200);
-            scores.Add(167);
-            scores.Sort();
-            scores.Reverse();
-            firstScore = scores[0];
-         
             for (int i = 0; i < scores.Count(); i++)
             {
-                drawBarChart(g, scores[i], 40+i*50, this.playerManager.name, Brushes.Blue);
+                //drawBarChart(g,scores., 40+i*50, this.playerManager.name, Brushes.Blue);
             }
-
         }
         
         // Methods for "updateBarGraph(g)"
@@ -487,7 +482,7 @@ namespace MultiplayerSnake
         // Timer
         private void tmUpdate_Tick(object sender, EventArgs e)
         {
-            //updateBarChart(lbSidebar.CreateGraphics());
+            updateBarChart(pictureBox1.CreateGraphics());
             
         }
 
