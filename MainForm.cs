@@ -75,7 +75,7 @@ namespace MultiplayerSnake
             int snakeboardCalculatedWidth, snakeboardCalculatedHeight;
 
             // calculate the max width and height
-            int width50Percent = control.Size.Width - 300;
+            int width50Percent = control.Size.Width - 20 - 280;
             int height75Percent = 3 * control.Size.Height / 4;
 
             // calculate aspect ratio
@@ -345,8 +345,9 @@ namespace MultiplayerSnake
             lbStatus.ForeColor = Color.Red;
             lbStatus.Text = "Game Over!";
 
-            // show retry button and last score
+            // show retry and highscore button and last score
             btnRetry.Show();
+            btnHighscores.Show();
             lbScore.Show();
             lbScore.Text = "Your Score: " + this.playerManager.lastScore;
         }
@@ -361,6 +362,7 @@ namespace MultiplayerSnake
             {
                 lbScore.Hide();
                 btnRetry.Hide();
+                btnHighscores.Hide();
                 startGame();
             }
         }
@@ -439,6 +441,5 @@ namespace MultiplayerSnake
         {
             this.onRetry();
         }
-
     }
 }

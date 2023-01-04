@@ -284,6 +284,7 @@ namespace MultiplayerSnake
                     this.playerManager.allSnakes.TryRemove(key, out var ignored1);
                     this.playerManager.otherSnakes.TryRemove(key, out var ignored2);
 
+                    // if our data got deleted, we got kicked out of the game
                     if (key == this.playerManager.name)
                     {
                         this.mainForm.onGameEnd(true);

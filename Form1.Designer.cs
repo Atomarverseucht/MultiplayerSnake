@@ -34,6 +34,7 @@
             this.lbUhr = new System.Windows.Forms.Label();
             this.lbSidebar = new TheArtOfDev.HtmlRenderer.WinForms.HtmlLabel();
             this.lbScore = new System.Windows.Forms.Label();
+            this.btnHighscores = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).BeginInit();
             this.SuspendLayout();
             // 
@@ -49,18 +50,18 @@
             // 
             // lbStatus
             // 
-            this.lbStatus.AutoSize = true;
             this.lbStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 35F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbStatus.Location = new System.Drawing.Point(0, 0);
             this.lbStatus.Name = "lbStatus";
-            this.lbStatus.Size = new System.Drawing.Size(228, 54);
+            this.lbStatus.Size = new System.Drawing.Size(280, 54);
             this.lbStatus.TabIndex = 2;
             this.lbStatus.Text = "Loading...";
+            this.lbStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnRetry
             // 
             this.btnRetry.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRetry.Location = new System.Drawing.Point(16, 426);
+            this.btnRetry.Location = new System.Drawing.Point(12, 426);
             this.btnRetry.Name = "btnRetry";
             this.btnRetry.Size = new System.Drawing.Size(75, 23);
             this.btnRetry.TabIndex = 4;
@@ -81,24 +82,35 @@
             // 
             this.lbSidebar.BackColor = System.Drawing.Color.Transparent;
             this.lbSidebar.BaseStylesheet = null;
-            this.lbSidebar.Location = new System.Drawing.Point(12, 59);
+            this.lbSidebar.Location = new System.Drawing.Point(12, 86);
             this.lbSidebar.Name = "lbSidebar";
-            this.lbSidebar.Size = new System.Drawing.Size(51, 20);
+            this.lbSidebar.Size = new System.Drawing.Size(63, 20);
             this.lbSidebar.TabIndex = 7;
             this.lbSidebar.TabStop = false;
-            this.lbSidebar.Text = "Sidebar";
+            this.lbSidebar.Text = "Loading...";
             // 
             // lbScore
             // 
             this.lbScore.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lbScore.AutoSize = true;
             this.lbScore.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbScore.Location = new System.Drawing.Point(12, 399);
+            this.lbScore.Location = new System.Drawing.Point(93, 397);
             this.lbScore.Name = "lbScore";
-            this.lbScore.Size = new System.Drawing.Size(60, 24);
+            this.lbScore.Size = new System.Drawing.Size(187, 50);
             this.lbScore.TabIndex = 8;
-            this.lbScore.Text = "Score";
+            this.lbScore.Text = "own score";
+            this.lbScore.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lbScore.Visible = false;
+            // 
+            // btnHighscores
+            // 
+            this.btnHighscores.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnHighscores.Location = new System.Drawing.Point(12, 397);
+            this.btnHighscores.Name = "btnHighscores";
+            this.btnHighscores.Size = new System.Drawing.Size(75, 23);
+            this.btnHighscores.TabIndex = 9;
+            this.btnHighscores.Text = "Highscores";
+            this.btnHighscores.UseVisualStyleBackColor = true;
+            this.btnHighscores.Visible = false;
             // 
             // MainForm
             // 
@@ -106,6 +118,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(834, 461);
+            this.Controls.Add(this.btnHighscores);
             this.Controls.Add(this.lbScore);
             this.Controls.Add(this.lbSidebar);
             this.Controls.Add(this.lbUhr);
@@ -131,6 +144,7 @@
         private System.Windows.Forms.Label lbUhr;
         private TheArtOfDev.HtmlRenderer.WinForms.HtmlLabel lbSidebar;
         private System.Windows.Forms.Label lbScore;
+        private System.Windows.Forms.Button btnHighscores;
     }
 }
 
