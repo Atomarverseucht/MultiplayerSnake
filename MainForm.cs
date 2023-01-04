@@ -398,7 +398,7 @@ namespace MultiplayerSnake
         // update side status bar
         public void updateSideBar()
         {
-            Dictionary<string, int> scores = new Dictionary<string, int>();
+            Dictionary<string, int> scores = new Dictionary<string, int>(); // merge conflict
             string formattedScore = "";
 
             int i = 0;
