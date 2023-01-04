@@ -107,7 +107,12 @@ namespace MultiplayerSnake.game
             // max 15 players
             while (getOnlinePlayers() >= Constants.MAX_PLAYERS)
             {
-                MessageBox.Show("The Game is full (15/15). Click the button to retry.", "Error");
+                DialogResult res = MessageBox.Show("The Game is full (15/15). Click the button to retry.", "Error", MessageBoxButtons.OKCancel);
+                if (res == DialogResult.Cancel)
+                {
+                    Application.Exit();
+                    return;
+                }
             }
         }
 
@@ -191,7 +196,7 @@ namespace MultiplayerSnake.game
                 {
                     continue;
                 }
-                usedColors[i++] = otherSnake.color;
+                usedColors[i] = otherSnake.color;
                 i++;
             }
 

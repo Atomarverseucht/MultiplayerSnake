@@ -198,15 +198,11 @@ namespace MultiplayerSnake
         // set the listeners for firebase
         public void registerFireBaseListeners()
         {
-            ManualResetEvent oSignalEvent = new ManualResetEvent(false);
-
             // value of foods changed, update it
             this.client.Child("snake/foods").AsObservable<FoodsData>((sender, e) => Console.Error.WriteLine(e.Exception), "").Subscribe(snapshot =>
             {
                 if (string.IsNullOrWhiteSpace(snapshot.Key))
                 {
-                    // if first run, signal main thread to continue
-                    oSignalEvent.Set();
                     return;
                 }
                 int key = int.Parse(snapshot.Key);
@@ -232,11 +228,7 @@ namespace MultiplayerSnake
                         this.foodManager.foods.Insert(key, snapshot.Object);
                     }
                 }
-
-                // if first run, signal main thread to continue
-                oSignalEvent.Set();
             });
-            oSignalEvent.WaitOne();
 
             // the food spawn type is forced by database
             this.client.Child("snake/variables").AsObservable<VariablesData>((sender, e) => Console.Error.WriteLine(e.Exception), "forcedFoodLevel").Subscribe(snapshot =>
@@ -250,19 +242,13 @@ namespace MultiplayerSnake
                     Application.Exit();
                     return;
                 }
-
-                // if first run, signal main thread to continue
-                oSignalEvent.Set();
             });
-            oSignalEvent.WaitOne();
 
             // listen for other snake(s) changes
             this.client.Child("snake/players").AsObservable<PlayerData>().Subscribe(snapshot =>
             {
                 if (string.IsNullOrWhiteSpace(snapshot.Key))
                 {
-                    // if first run, signal main thread to continue
-                    oSignalEvent.Set();
                     return;
                 }
 
@@ -292,7 +278,6 @@ namespace MultiplayerSnake
                         Application.Exit();
                     }
 
-                    oSignalEvent.Set();
                     return;
                 }
 
@@ -309,11 +294,7 @@ namespace MultiplayerSnake
                 // we need to have a seperate dict with only other players
                 this.playerManager.otherSnakes = new ConcurrentDictionary<string, PlayerData>(this.playerManager.allSnakes);
                 this.playerManager.otherSnakes.TryRemove(this.playerManager.name, out var ignored3);
-
-                // if first run, signal main thread to continue
-                oSignalEvent.Set();
             });
-            oSignalEvent.WaitOne();
         }
     }
 }
