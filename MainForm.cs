@@ -441,5 +441,11 @@ namespace MultiplayerSnake
         {
             this.onRetry();
         }
+
+        private void btnHighscores_Click(object sender, EventArgs e)
+        {
+            HighscoresForm highscoresForm = new HighscoresForm();
+            highscoresForm.Show();
+        }
     }
 }

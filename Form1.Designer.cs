@@ -111,6 +111,7 @@
             this.btnHighscores.Text = "Highscores";
             this.btnHighscores.UseVisualStyleBackColor = true;
             this.btnHighscores.Visible = false;
+            this.btnHighscores.Click += new System.EventHandler(this.btnHighscores_Click);
             // 
             // MainForm
             // 
