@@ -299,7 +299,7 @@ namespace MultiplayerSnake
                 this.playerManager.allSnakes[key] = playerData;
 
                 // check if the update data is for us and the color is not null or empty
-                if (key == this.playerManager.name && string.IsNullOrWhiteSpace(playerData.color))
+                if (key == this.playerManager.name && !string.IsNullOrWhiteSpace(playerData.color))
                 {
                     // then we can set our own color
                     this.playerManager.color = playerData.color;
