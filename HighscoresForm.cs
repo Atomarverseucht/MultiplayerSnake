@@ -33,7 +33,14 @@ namespace MultiplayerSnake
         {
             g.DrawString(p_name, new Font("Arial", 12), Brushes.Black, 10, yposition);                                              // displays the name
             g.FillRectangle(b, 0, yposition+20, calculateBar(score), 5);                                                            // Bargraph
-            g.DrawString(score.ToString(), new Font("Arial", 12), Brushes.DarkGray, calculateBar(score) + 10, yposition + 12);      // displays the score
+            if (calculateBar(score) > 100)
+            {
+                g.DrawString(score.ToString(), new Font("Arial", 12), Brushes.DarkGray, calculateBar(score) + 10, yposition + 12);      // displays the score
+            }
+            else
+            {
+                g.DrawString(score.ToString(), new Font("Arial", 12), Brushes.DarkGray, 110, yposition + 12);
+            }
 
         }
 
