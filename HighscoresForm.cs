@@ -66,7 +66,6 @@ namespace MultiplayerSnake
                 sf.Alignment = StringAlignment.Center;
                 e.Graphics.DrawString("No Highscores found.", new Font("Arial", 12), Brushes.Red, e.ClipRectangle, sf);
                 return;
-
             }
 
             firstScore = scores.ElementAt(0).Value;

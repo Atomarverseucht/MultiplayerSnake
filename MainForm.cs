@@ -481,8 +481,11 @@ namespace MultiplayerSnake
             Dictionary<string, int> highscores = this.firebase.queryOnce<Dictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
             highscores = highscores == null ? new Dictionary<string, int>() : highscores;
 
-            highscores.Add("[Your Score]", this.playerManager.lastScore);
-            highscores = highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToDictionary(z => z.Key, y => y.Value);
+            if (this.playerManager.lastScore > 0)
+            {
+                highscores.Add("[Your Score]", this.playerManager.lastScore);
+                highscores = highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToDictionary(z => z.Key, y => y.Value);
+            }
 
             HighscoresForm highscoresForm = new HighscoresForm(highscores);
             highscoresForm.Show();
