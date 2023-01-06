@@ -63,15 +63,15 @@ namespace MultiplayerSnake
             e.Graphics.Clear(SystemColors.Control);
 
             // Calls the function drawBarChart()
-           int i = 0;
+            int i = 0;
             foreach (KeyValuePair<int, string> score in scores)
             {
                 int scorePlayer = score.Key;
-                string namePlayer = score.Value.Split('#')[0];
-                string colorPlayer = score.Value.Split('#')[1];
-                drawBarChart(e.Graphics, scorePlayer, i * 50 + 20, namePlayer, new SolidBrush(Color.FromName(colorPlayer)));
+                string namePlayer = score.Value;
+                drawBarChart(e.Graphics, scorePlayer, i * 50 + 20, namePlayer, new SolidBrush(Color.FromName(colors[Math.Min(i, 3)])));
                 i++;
             }
         }
+        private readonly string[] colors = new string[] { "gold", "silver", "chocolate", "black" };
     }
 }
