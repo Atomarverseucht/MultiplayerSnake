@@ -91,6 +91,7 @@
     </Compile>
     <Compile Include="MultiplayerSnake.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="utils\KeyMessageFilter.cs" />
     <Compile Include="utils\Utils.cs" />
     <EmbeddedResource Include="HighscoresForm.resx">
       <DependentUpon>HighscoresForm.cs</DependentUpon>

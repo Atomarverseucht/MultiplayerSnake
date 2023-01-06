@@ -53,13 +53,16 @@ namespace MultiplayerSnake
         // indicates whether the player was kicked
         private bool kicked = false;
 
+        // message filter for key down event
+        private KeyMessageFilter m_filter;
+
         public MainForm()
         {
             InitializeComponent();
             // allow to go in fullscreen with f11
-            fullScreen = new FullScreen(this);
-            KeyPreview = true;
-            KeyDown += MainForm_KeyDown;
+            this.fullScreen = new FullScreen(this);
+            this.m_filter = new KeyMessageFilter(this);
+            Application.AddMessageFilter(this.m_filter);
 
             this.resizeSnakeboard(this);
 
@@ -263,8 +266,6 @@ namespace MultiplayerSnake
             {
                 await Task.Delay(1);
 
-                //if (Key)
-
                 this.updateRequested = true;
                 pbGame.Invalidate();
             }
@@ -406,9 +407,9 @@ namespace MultiplayerSnake
             }
         }
 
-        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        public void onKeyDown(Keys key)
         {
-            this.playerManager.onKeyDown(e.KeyCode);
+            this.playerManager.onKeyDown(key);
         }
 
         /// <summary>
