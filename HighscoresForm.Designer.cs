@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.pbHighscores = new System.Windows.Forms.PictureBox();
-            this.btBack = new System.Windows.Forms.Button();
+            this.btClose = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.pnScroll = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.pbHighscores)).BeginInit();
@@ -40,22 +40,22 @@
             // 
             this.pbHighscores.Location = new System.Drawing.Point(0, 0);
             this.pbHighscores.Name = "pbHighscores";
-            this.pbHighscores.Size = new System.Drawing.Size(514, 834);
+            this.pbHighscores.Size = new System.Drawing.Size(514, 100);
             this.pbHighscores.TabIndex = 0;
             this.pbHighscores.TabStop = false;
             this.pbHighscores.Paint += new System.Windows.Forms.PaintEventHandler(this.pbHighscores_Paint);
             // 
-            // btBack
+            // btClose
             // 
-            this.btBack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btBack.Location = new System.Drawing.Point(12, 318);
-            this.btBack.Name = "btBack";
-            this.btBack.Size = new System.Drawing.Size(75, 23);
-            this.btBack.TabIndex = 1;
-            this.btBack.Text = "Back";
-            this.btBack.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.btBack.UseVisualStyleBackColor = true;
-            this.btBack.Click += new System.EventHandler(this.btBack_Click);
+            this.btClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btClose.Location = new System.Drawing.Point(447, 318);
+            this.btClose.Name = "btClose";
+            this.btClose.Size = new System.Drawing.Size(75, 23);
+            this.btClose.TabIndex = 1;
+            this.btClose.Text = "Close";
+            this.btClose.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.btClose.UseVisualStyleBackColor = true;
+            this.btClose.Click += new System.EventHandler(this.btClose_Click);
             // 
             // label1
             // 
@@ -64,9 +64,9 @@
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(0, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(161, 31);
+            this.label1.Size = new System.Drawing.Size(104, 31);
             this.label1.TabIndex = 2;
-            this.label1.Text = "Highscores\r\n";
+            this.label1.Text = "Top 10";
             // 
             // pnScroll
             // 
@@ -89,7 +89,7 @@
             this.ClientSize = new System.Drawing.Size(534, 353);
             this.Controls.Add(this.pnScroll);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.btBack);
+            this.Controls.Add(this.btClose);
             this.MinimumSize = new System.Drawing.Size(550, 392);
             this.Name = "HighscoresForm";
             this.Text = "Highscores";
@@ -103,7 +103,7 @@
         #endregion
 
         private System.Windows.Forms.PictureBox pbHighscores;
-        private System.Windows.Forms.Button btBack;
+        private System.Windows.Forms.Button btClose;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Panel pnScroll;
     }

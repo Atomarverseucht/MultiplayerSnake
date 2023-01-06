@@ -49,14 +49,13 @@ namespace MultiplayerSnake
             return score * (Width-100) / firstScore;
         }
 
-        private void btBack_Click(object sender, EventArgs e)
+        private void btClose_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
         private void pbHighscores_Paint(object sender, PaintEventArgs e)
-        {   
-            
+        {
             e.Graphics.Clear(SystemColors.Control);
             // if there are no scores, tell the player by writing it on the center of the PB
             if (!scores.Any())
@@ -71,12 +70,24 @@ namespace MultiplayerSnake
             firstScore = scores.ElementAt(0).Value;
             // Calls the function drawBarChart()
             int i = 0;
+            int color = -1;
+            int playerScoreBefore = 0;
             foreach (KeyValuePair<string, int> score in scores)
             {
-                int scorePlayer = score.Value;
-                string namePlayer = score.Key;
+                // this replace is needed, because some names may get interpreted as a number and not string by the database
+                string playerName = score.Key.Replace("<>", "");
+                int playerScore = score.Value;
+
+                if (playerScoreBefore != playerScore)
+                {
+                    color++;
+                }
+                playerScoreBefore = playerScore;
+
                 // add the specific highscore + player name
-                drawBarChart(e.Graphics, scorePlayer, i * 50 + 20, namePlayer, new SolidBrush(Color.FromName(colors[Math.Min(i, 3)])));
+                drawBarChart(e.Graphics, playerScore, i * 50 + 20, playerName, new SolidBrush(Color.FromName(colors[Math.Min(color, 3)])));
+
+
                 i++;
             }
         }

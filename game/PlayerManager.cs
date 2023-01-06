@@ -127,7 +127,7 @@ namespace MultiplayerSnake.game
             while (this.name == "")
             {
                 // prompt the player to enter a name
-                DialogResult res = InputBox.ShowDialog("Choose a player name:\n\n\".\", \"/\", \"#\", \"$\", \"[\", or \"]\" will be replaced by \"_\".", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
+                DialogResult res = InputBox.ShowDialog("Choose a player name:\n\n\".\", \"/\", \"#\", \"$\", \"[\", \"]\", \"<\" or \">\" will be replaced by \"_\".", "Name", InputBox.Icon.Question, InputBox.Buttons.Ok, InputBox.Type.TextBox);
                 if (res == DialogResult.None)
                 {
                     Application.Exit();
@@ -137,7 +137,7 @@ namespace MultiplayerSnake.game
                 this.name = tempName == null ? "" : tempName;
 
                 // replace unwanted symbols with underscore
-                this.name = this.name.Replace(".", "_").Replace("#", "_").Replace("$", "_").Replace("[", "_").Replace("]", "_").Replace("/", "_");
+                this.name = this.name.Replace(".", "_").Replace("#", "_").Replace("$", "_").Replace("[", "_").Replace("]", "_").Replace("/", "_").Replace("<", "_").Replace(">", "_");
 
                 if (this.name.Length > 16)
                 {
