@@ -340,7 +340,12 @@ namespace MultiplayerSnake
             this.playerManager.snake.Clear();
 
             if (kicked)
+            {
+                btnRetry.Hide();
+                btnHighscores.Hide();
+                lbScore.Hide();
                 return;
+            }
 
             // show game over message
             lbStatus.ForeColor = Color.Red;
