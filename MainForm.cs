@@ -13,6 +13,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using System.Drawing.Drawing2D;
 using System.Xml.Linq;
 using Newtonsoft.Json;
+using System.Collections.Concurrent;
 
 namespace MultiplayerSnake
 {
@@ -334,6 +335,7 @@ namespace MultiplayerSnake
         /// </summary>
         public void onGameEnd(bool kicked=false)
         {
+            this.playerManager.lastScore = this.playerManager.snake.Count - 5;
             this.isGameEnded = true;
             // remove our snake from the board
             this.firebase.setPlayerData(new List<PlayerPositionData>());
@@ -341,29 +343,40 @@ namespace MultiplayerSnake
             this.foodManager.dropRandomFood();
             this.playerManager.snake.Clear();
 
-            if (kicked)
-            {
-                this.kicked = true;
-                return;
-            }
+            // try to get the current highscores from db
+            ConcurrentDictionary<string, int> highscores = this.firebase.queryOnce<ConcurrentDictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
+            // make sure, it is not null
+            highscores = highscores == null ? new ConcurrentDictionary<string, int>() : highscores;
 
-            //Highscore stuff
-            Dictionary<string, int> highscores = this.firebase.queryOnce<Dictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
-            highscores = highscores == null ? new Dictionary<string, int>() : highscores;
-            highscores.Add(this.playerManager.name, this.playerManager.lastScore);
-            highscores = highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToDictionary(z => z.Key, y => y.Value);
+            // attempt to add our score
+            highscores.AddOrUpdate(this.playerManager.name, this.playerManager.lastScore,
+                // if the score is bigger than last time, update it to the bigger one, else just leave it as is
+                (key, oldValue) => oldValue < this.playerManager.lastScore
+                ? this.playerManager.lastScore
+                : oldValue);
+
+            // sort the highscores by value
+            highscores = new ConcurrentDictionary<string, int> (highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToDictionary(z => z.Key, y => y.Value));
             if (this.playerManager.lastScore <= 0)
             {
                 //don´t put data in database
             }
             else if (highscores.Count <= 10)
             {
+                // if the highscore list is not full (<=10), just send the new list to db
                 this.firebase.put(Constants.FIREBASE_HIGHSCORES_KEY, highscores);
             }
             else if (highscores.ElementAt(highscores.Count - 1).Key != this.playerManager.name)
             {
-                highscores.Remove(highscores.Keys.Last());
+                // otherwise we need to add the highscores to the database
+                highscores.TryRemove(highscores.Keys.Last(), out var ignored);
                 this.firebase.put(Constants.FIREBASE_HIGHSCORES_KEY, highscores);
+            }
+
+            if (kicked)
+            {
+                this.kicked = true;
+                return;
             }
 
             // show game over message
@@ -437,11 +450,6 @@ namespace MultiplayerSnake
 
                 int score = playerData.pos == null ? -5 : playerData.pos.Count() - 5;
 
-                this.playerManager.lastScore =
-                    score >= 0 && playerName == this.playerManager.name
-                    ? score
-                    : this.playerManager.lastScore;
-
                 scores.Add(playerName, score);
                 i++;
             }
@@ -470,6 +478,10 @@ namespace MultiplayerSnake
         {
             Dictionary<string, int> highscores = this.firebase.queryOnce<Dictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
             highscores = highscores == null ? new Dictionary<string, int>() : highscores;
+
+            highscores.Add("[Your Score]", this.playerManager.lastScore);
+            highscores = highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToDictionary(z => z.Key, y => y.Value);
+
             HighscoresForm highscoresForm = new HighscoresForm(highscores);
             highscoresForm.Show();
         }
