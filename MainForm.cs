@@ -49,6 +49,9 @@ namespace MultiplayerSnake
         private float scalingX = 1;
         private float scalingY = 1;
 
+        // indicates whether the player was kicked
+        private bool kicked = false;
+
         public MainForm()
         {
             InitializeComponent();
@@ -341,9 +344,7 @@ namespace MultiplayerSnake
 
             if (kicked)
             {
-                btnRetry.Hide();
-                btnHighscores.Hide();
-                lbScore.Hide();
+                this.kicked = true;
                 return;
             }
 
@@ -364,7 +365,7 @@ namespace MultiplayerSnake
         public void onRetry()
         {
             // if the player isn't alive, restart
-            if (isGameEnded)
+            if (this.isGameEnded && !this.kicked)
             {
                 lbScore.Hide();
                 btnRetry.Hide();
