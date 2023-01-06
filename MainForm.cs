@@ -56,6 +56,8 @@ namespace MultiplayerSnake
         // message filter for key down event
         private KeyMessageFilter m_filter;
 
+        private ConcurrentDictionary<string, int> highscores;
+
         public MainForm()
         {
             InitializeComponent();
@@ -350,19 +352,19 @@ namespace MultiplayerSnake
             string highscoreName = "<>" + this.playerManager.name;
 
             // try to get the current highscores from db
-            ConcurrentDictionary<string, int> highscores = this.firebase.queryOnce<ConcurrentDictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
+            //ConcurrentDictionary<string, int> highscores = this.firebase.queryOnce<ConcurrentDictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
             // make sure, it is not null
-            highscores = highscores == null ? new ConcurrentDictionary<string, int>() : highscores;
+            this.highscores = this.highscores == null ? new ConcurrentDictionary<string, int>() : this.highscores;
 
             // attempt to add our score
-            highscores.AddOrUpdate(highscoreName, this.playerManager.lastScore,
+            this.highscores.AddOrUpdate(highscoreName, this.playerManager.lastScore,
                 // if the score is bigger than last time, update it to the bigger one, else just leave it as is
                 (key, oldValue) => oldValue < this.playerManager.lastScore
                 ? this.playerManager.lastScore
                 : oldValue);
 
             // sort the highscores by value
-            List<KeyValuePair<string, int>> orderedHighscores = highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToList();
+            List<KeyValuePair<string, int>> orderedHighscores = this.highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToList();
             if (this.playerManager.lastScore <= 0)
             {
                 //don´t put data in database
@@ -370,12 +372,12 @@ namespace MultiplayerSnake
             else if (orderedHighscores.Count() <= 10)
             {
                 // if the highscore list is not full (<=10), just send the new list to db
-                this.firebase.put(Constants.FIREBASE_HIGHSCORES_KEY, highscores);
+                this.firebase.put(Constants.FIREBASE_HIGHSCORES_KEY, this.highscores);
             }
-            else if (orderedHighscores.ElementAt(highscores.Count - 1).Key != highscoreName)
+            else if (orderedHighscores.ElementAt(this.highscores.Count - 1).Key != highscoreName)
             {
                 // otherwise we need to add the highscores to the database
-                orderedHighscores.RemoveAt(highscores.Count - 1);
+                orderedHighscores.RemoveAt(this.highscores.Count - 1);
                 this.firebase.put(Constants.FIREBASE_HIGHSCORES_KEY, orderedHighscores.ToDictionary(z => z.Key, y => y.Value));
             }
 
@@ -482,7 +484,7 @@ namespace MultiplayerSnake
 
         private void btnHighscores_Click(object sender, EventArgs e)
         {
-            Dictionary<string, int> highscores = this.firebase.queryOnce<Dictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
+            Dictionary<string, int> highscores = new Dictionary<string, int>(this.highscores);
             highscores = highscores == null ? new Dictionary<string, int>() : highscores;
 
             if (this.playerManager.lastScore > 0)

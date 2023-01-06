@@ -25,7 +25,7 @@ namespace MultiplayerSnake.game
         private int foodLightness = 0;
 
         // food positions
-        public List<FoodsData> foods = new List<FoodsData>();
+        public ConcurrentDictionary<int, FoodsData> foods = new ConcurrentDictionary<int, FoodsData>();
 
         // if not negative, only this type of food will spawn
         public int forcedFoodLevel = -1;
@@ -63,7 +63,7 @@ namespace MultiplayerSnake.game
         {
             lock (this.foods)
             {
-                this.foods.Add(foodData);
+                this.foods.TryAdd(this.foods.Count, foodData);
             }
         }
 
@@ -76,24 +76,27 @@ namespace MultiplayerSnake.game
         public int removeFood(int x, int y)
         {
             // the new food data
-            List<FoodsData> newFoods = new List<FoodsData>();
+            ConcurrentDictionary<int, FoodsData> newFoods = new ConcurrentDictionary<int, FoodsData>();
             // the food level of the removed food
             int foodLevel = Constants.FOOD_LEVEL_RANDOM;
 
-            foreach (FoodsData food in foods)
+            lock (this.foods)
             {
-                // getting the data of the other food
-                int foodX = food.x;
-                int foodY = food.y;
+                foreach (FoodsData food in this.foods.Values)
+                {
+                    // getting the data of the other food
+                    int foodX = food.x;
+                    int foodY = food.y;
 
-                // if the data isn't equal to our data, we will add it to the new list
-                if (x != foodX || y != foodY)
-                {
-                    newFoods.Add(food);
-                }
-                else
-                {
-                    foodLevel = food.level;
+                    // if the data isn't equal to our data, we will add it to the new list
+                    if (x != foodX || y != foodY)
+                    {
+                        newFoods.TryAdd(newFoods.Count, food);
+                    }
+                    else
+                    {
+                        foodLevel = food.level;
+                    }
                 }
             }
 
@@ -173,11 +176,18 @@ namespace MultiplayerSnake.game
         /// </summary>
         public void checkFoodsAvailable()
         {
-            if (this.playerManager.getActivePlayers() <= 1 && this.foods.Count == 0)
+            lock (this.foods)
             {
-                addFood(Utils.randomCoordinateX(), Utils.randomCoordinateY(), randomFoodLevel());
-                this.firebase.updateFoods();
+                if (this.playerManager.getActivePlayers() <= 1 && this.foods.Count == 0)
+                {
+                    lock (this.foods)
+                    {
+                        addFood(Utils.randomCoordinateX(), Utils.randomCoordinateY(), randomFoodLevel());
+                        this.firebase.updateFoods();
+                    }
+                }
             }
+            
         }
 
         /// <summary>
@@ -188,11 +198,14 @@ namespace MultiplayerSnake.game
         {
             lock (this.foods)
             {
-                foreach (FoodsData food in this.foods)
+                foreach (FoodsData food in this.foods.Values)
                 {
-                    Rectangle rect = new Rectangle(food.x, food.y, 10, 10);
-                    g.FillRectangle(new SolidBrush(this.currentFoodLightness(Utils.getFoodColorByLevel(food.level))), rect);
-                    g.DrawRectangle(Pens.Black, rect);
+                    lock (this.foods)
+                    {
+                        Rectangle rect = new Rectangle(food.x, food.y, 10, 10);
+                        g.FillRectangle(new SolidBrush(this.currentFoodLightness(Utils.getFoodColorByLevel(food.level))), rect);
+                        g.DrawRectangle(Pens.Black, rect);
+                    }
                 }
             }
 
@@ -221,11 +234,17 @@ namespace MultiplayerSnake.game
         /// <returns></returns>
         public bool hasEatenFood()
         {
-            foreach (FoodsData food in foods)
+            lock (this.foods)
             {
-                if (this.playerManager.snake[0].x == food.x && this.playerManager.snake[0].y == food.y)
+                foreach (FoodsData food in this.foods.Values)
                 {
-                    return true;
+                    lock (this.foods)
+                    {
+                        if (this.playerManager.snake[0].x == food.x && this.playerManager.snake[0].y == food.y)
+                        {
+                            return true;
+                        }
+                    }
                 }
             }
 
@@ -258,15 +277,24 @@ namespace MultiplayerSnake.game
                         randomFood = this.genFood();
 
                         // there are no positions to check
-                        if (this.foods.Count == 0)
-                            noFoodPosFound = false;
-
-                        // check all other food positions to avoid overlap
-                        foreach (FoodsData food in this.foods)
+                        lock (this.foods)
                         {
-                            if (food.x != randomFood.x || food.y != randomFood.y)
-                            {
+                            if (this.foods.Count == 0)
                                 noFoodPosFound = false;
+                        }
+
+                        lock (this.foods)
+                        {
+                            // check all other food positions to avoid overlap
+                            foreach (FoodsData food in this.foods.Values)
+                            {
+                                lock (this.foods)
+                                {
+                                    if (food.x != randomFood.x || food.y != randomFood.y)
+                                    {
+                                        noFoodPosFound = false;
+                                    }
+                                }
                             }
                         }
                     }

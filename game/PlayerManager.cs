@@ -147,7 +147,7 @@ namespace MultiplayerSnake.game
                 }
 
                 // the color value is set, so there must be a user, that has taken this name
-                if (this.firebase.queryOnce<string>(Constants.FIREBASE_PLAYER_COLOR_KEY.Replace("%name%", this.name)) != null)
+                if (/*this.firebase.queryOnce<string>(Constants.FIREBASE_PLAYER_COLOR_KEY.Replace("%name%", this.name)) != null*/ this.allSnakes.TryGetValue(this.name, out var ignored))
                 {
                     MessageBox.Show("Someone has already chosen this name.", "Error");
                     this.name = "";

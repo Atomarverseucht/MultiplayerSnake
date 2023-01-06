@@ -34,7 +34,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Firebase, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\FirebaseDatabase.net.4.1.0\lib\netstandard2.0\Firebase.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Firebase.dll</HintPath>
     </Reference>
     <Reference Include="HtmlRenderer, Version=1.5.0.6, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\HtmlRenderer.Core.1.5.0.6\lib\net45\HtmlRenderer.dll</HintPath>
@@ -71,6 +72,7 @@
     <Compile Include="database\data\PlayerData.cs" />
     <Compile Include="database\data\PlayerPositionData.cs" />
     <Compile Include="database\data\VariablesData.cs" />
+    <Compile Include="database\data\SnakeData.cs" />
     <Compile Include="game\FoodManager.cs" />
     <Compile Include="game\PlayerManager.cs" />
     <Compile Include="HighscoresForm.cs">

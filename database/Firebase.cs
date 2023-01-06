@@ -1,12 +1,16 @@
 ﻿using Firebase.Database;
+using Firebase.Database.Offline;
 using Firebase.Database.Query;
 using Firebase.Database.Streaming;
+using MultiplayerSnake.database;
 using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
 using MultiplayerSnake.game;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -81,7 +85,7 @@ namespace MultiplayerSnake
                         // when there is no currently running update task, create one
                         lock (this.updateTask) lock (value)
                             {
-                                this.updateTask = this.client.Child("snake/" + key).PutAsync<T>(value);
+                                this.updateTask = this.client.Child("snake/" + key).PutAsync(value);
                             }
                     }
                     else
@@ -93,7 +97,7 @@ namespace MultiplayerSnake
                             {
                                 lock (this.updateTask) lock (value)
                                     {
-                                        this.updateTask = this.client.Child("snake/" + key).PutAsync<T>(value);
+                                        this.updateTask = this.client.Child("snake/" + key).PutAsync(value);
                                     }
                             });
                         }
@@ -134,15 +138,6 @@ namespace MultiplayerSnake
                 Console.Error.WriteLine(ex);
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Querys the database for the version and compares it with the clients version.
-        /// </summary>
-        /// <returns>true if the version is up to date</returns>
-        public bool checkVersion()
-        {
-            return this.checkVersion(this.queryOnce<int>(Constants.FIREBASE_VERSION_KEY));
         }
 
         /// <summary>
@@ -193,102 +188,60 @@ namespace MultiplayerSnake
         // set the listeners for firebase
         public void registerFireBaseListeners()
         {
-            // value of foods changed, update it
-            this.client.Child("snake/foods").AsObservable<FoodsData>((sender, e) => Console.Error.WriteLine(e.Exception), "").Subscribe(snapshot =>
+            this.client.Child("").AsObservable<SnakeData>((sender, e) => Console.Error.WriteLine(e.Exception), "").Subscribe(snapshot =>
             {
-                if (string.IsNullOrWhiteSpace(snapshot.Key))
+
+                SnakeData snakeData = snapshot.Object;
+                if (snakeData == null)
                 {
                     return;
                 }
-                int key = int.Parse(snapshot.Key);
 
-                // check if the food got deleted
-                if (snapshot.EventType == FirebaseEventType.Delete)
-                {
-                    // remove the food from the list
-                    lock (this.foodManager.foods)
-                    {
-                        this.foodManager.foods.RemoveAt(key);
-                    }
-                }
-                else
-                {
-                    lock (this.foodManager.foods)
-                    {
-                        // add the food to the list
-                        if (this.foodManager.foods.Count > key && this.foodManager.foods[key] != null)
-                        {
-                            this.foodManager.foods.RemoveAt(key);
-                        }
-                        this.foodManager.foods.Insert(key, snapshot.Object);
-                    }
-                }
-            });
+                // --------- foods ---------
 
-            // the food spawn type is forced by database
-            this.client.Child("snake/variables").AsObservable<VariablesData>((sender, e) => Console.Error.WriteLine(e.Exception), "forcedFoodLevel").Subscribe(snapshot =>
-            {
+                this.foodManager.foods = snakeData.foods == null
+                    ? new ConcurrentDictionary<int, FoodsData>()
+                    : new ConcurrentDictionary<int, FoodsData>(snakeData.foods.Select((s, i) => new { s, i }).ToDictionary(x => x.i, x => x.s));
+
+                // --------- variables ---------
+
                 // set new forced food level
-                this.foodManager.forcedFoodLevel = snapshot.Object.forcedFoodLevel;
+                this.foodManager.forcedFoodLevel = snakeData.variables.forcedFoodLevel;
 
                 // check for version changes, if version changed, close app
-                if (!this.checkVersion(snapshot.Object.version))
+                if (!this.checkVersion(snakeData.variables.version))
                 {
                     Application.Exit();
                     return;
                 }
-            });
 
-            // listen for other snake(s) changes
-            this.client.Child("snake/players").AsObservable<PlayerData>().Subscribe(snapshot =>
-            {
-                if (string.IsNullOrWhiteSpace(snapshot.Key))
+                // --------- player ---------
+
+                if (snakeData.players != null)
                 {
-                    return;
-                }
-
-                string key = snapshot.Key;
-                PlayerData playerData = snapshot.Object;
-
-                // the database doesn't tell us, if the whole player key got deleted or just parts of it
-                // so we need to query the database for updates
-                bool found = true;
-                if (snapshot.EventType == FirebaseEventType.Delete)
-                {
-                    found = !string.IsNullOrEmpty(this.queryOnce<string>("players/" + key + "/color"));
-                }
-
-                // check if we even have player data
-                if (!found || playerData == null)
-                {
-                    // remove the player
-                    this.playerManager.allSnakes.TryRemove(key, out var ignored1);
-                    this.playerManager.otherSnakes.TryRemove(key, out var ignored2);
-
-                    // if our data got deleted, we got kicked out of the game
-                    if (key == this.playerManager.name)
+                    this.playerManager.allSnakes = snakeData.players;
+                    foreach (KeyValuePair<string, PlayerData> player in snakeData.players)
                     {
-                        this.mainForm.onGameEnd(true);
-                        MessageBox.Show("You were kicked from the game!", "Info");
-                        Application.Exit();
+                        string key = player.Key;
+                        PlayerData playerData = player.Value;
+
+                        // check if the update data is for us and the color is not null or empty
+                        if (key == this.playerManager.name && !string.IsNullOrWhiteSpace(playerData.color))
+                        {
+                            // then we can set our own color
+                            this.playerManager.color = playerData.color;
+                        }
+
+                        // we need to have a seperate dict with only other players
+                        this.playerManager.otherSnakes = new ConcurrentDictionary<string, PlayerData>(this.playerManager.allSnakes);
+                        this.playerManager.otherSnakes.TryRemove(this.playerManager.name, out var ignored3);
                     }
-
-                    return;
                 }
-
-                // update all snakes (used to count online (registered) players)
-                this.playerManager.allSnakes[key] = playerData;
-
-                // check if the update data is for us and the color is not null or empty
-                if (key == this.playerManager.name && !string.IsNullOrWhiteSpace(playerData.color))
+                else
                 {
-                    // then we can set our own color
-                    this.playerManager.color = playerData.color;
+                    this.playerManager.allSnakes.Clear();
+                    this.playerManager.otherSnakes.Clear();
                 }
-
-                // we need to have a seperate dict with only other players
-                this.playerManager.otherSnakes = new ConcurrentDictionary<string, PlayerData>(this.playerManager.allSnakes);
-                this.playerManager.otherSnakes.TryRemove(this.playerManager.name, out var ignored3);
             });
         }
     }

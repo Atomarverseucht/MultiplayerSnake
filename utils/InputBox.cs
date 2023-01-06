@@ -63,6 +63,7 @@ namespace MultiplayerSnake
         Icon icon = Icon.Information, Buttons buttons = Buttons.Ok, Type type = Type.Nothing,
         string[] ListItems = null, bool ShowInTaskBar = true, Font FormFont = null)
         {
+            DialogRes = DialogResult.None;
             frm.Controls.Clear();
             ResultValue = "";
             //Form definition
