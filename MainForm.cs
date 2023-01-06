@@ -59,7 +59,6 @@ namespace MultiplayerSnake
             // allow to go in fullscreen with f11
             fullScreen = new FullScreen(this);
             KeyPreview = true;
-            PreviewKeyDown += (sender, e) => e.IsInputKey = true;
             KeyDown += MainForm_KeyDown;
 
             this.resizeSnakeboard(this);
@@ -263,6 +262,8 @@ namespace MultiplayerSnake
             while (true)
             {
                 await Task.Delay(1);
+
+                //if (Key)
 
                 this.updateRequested = true;
                 pbGame.Invalidate();

@@ -10,6 +10,10 @@ namespace MultiplayerSnake
     {
         private Dictionary<string, int> scores;
 
+        private readonly string[] colors = new string[] { "gold", "silver", "chocolate", "black" };
+
+        int firstScore = 100; // max. Score
+
         public HighscoresForm(Dictionary<string, int> scores)
         {
             this.scores = scores;
@@ -24,10 +28,7 @@ namespace MultiplayerSnake
             pnScroll.Width = this.Width - 16;
             pbHighscores.Width = pnScroll.Size.Width - 17;
             pnScroll.Height = this.Height - 114;
-            if (!scores.Any())
-            {
-                pbHighscores.Height = pnScroll.Height;
-            }
+            pbHighscores.Height = this.calculatePbHeight();
 
             pbHighscores.Invalidate();
         }
@@ -49,13 +50,10 @@ namespace MultiplayerSnake
 
         }
 
-        int firstScore = 100; // max. Score
-
         public int calculateBar(int score)
         {
             return score * (Width-100) / firstScore;   // Score * max. length / max. score
         }
-
 
         private void btBack_Click(object sender, EventArgs e)
         {
@@ -87,6 +85,15 @@ namespace MultiplayerSnake
                 i++;
             }
         }
-        private readonly string[] colors = new string[] { "gold", "silver", "chocolate", "black" };
+
+        private int calculatePbHeight()
+        {
+            if (!scores.Any())
+            {
+                return pnScroll.Height;
+            }
+
+            return 2 * 20 + (this.scores.Count - 1) * 50 + 12;
+        }
     }
 }
