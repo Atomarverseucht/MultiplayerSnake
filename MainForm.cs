@@ -444,7 +444,7 @@ namespace MultiplayerSnake
 
         private void btnHighscores_Click(object sender, EventArgs e)
         {
-            HighscoresForm highscoresForm = new HighscoresForm(new Dictionary<int, string>() { { 455, "player1#red" }, { 33, "player2#blue" } });
+            HighscoresForm highscoresForm = new HighscoresForm(new Dictionary<int, string>() { { 455, "player1" }, { 233, "player2" }, {150, "Kevin" },{12, "Herr Beser" } });
             highscoresForm.Show();
         }
     }
