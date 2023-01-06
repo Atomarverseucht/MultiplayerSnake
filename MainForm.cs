@@ -335,7 +335,6 @@ namespace MultiplayerSnake
         public void onGameEnd(bool kicked=false)
         {
             this.isGameEnded = true;
-
             // remove our snake from the board
             this.firebase.setPlayerData(new List<PlayerPositionData>());
             // drop random food from out snake
@@ -346,6 +345,25 @@ namespace MultiplayerSnake
             {
                 this.kicked = true;
                 return;
+            }
+
+            //Highscore fuss
+            Dictionary<string, int> highscores = this.firebase.queryOnce<Dictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
+            highscores = highscores == null ? new Dictionary<string, int>() : highscores;
+            highscores.Add(this.playerManager.name, this.playerManager.lastScore);
+            highscores.OrderByDescending(keyValuePair => keyValuePair.Value);
+            if (this.playerManager.lastScore <= 0)
+            {
+                //don´t put data in database
+            }
+            else if (highscores.Count <= 10)
+            {
+                this.firebase.put(Constants.FIREBASE_HIGHSCORES_KEY, highscores);
+            }
+            else if (highscores.ElementAt(highscores.Count - 1).Key != this.playerManager.name)
+            {
+                highscores.Remove(highscores.Keys.Last());
+                this.firebase.put(Constants.FIREBASE_HIGHSCORES_KEY, highscores);
             }
 
             // show game over message
@@ -450,7 +468,9 @@ namespace MultiplayerSnake
 
         private void btnHighscores_Click(object sender, EventArgs e)
         {
-            HighscoresForm highscoresForm = new HighscoresForm(new Dictionary<int, string>() { { 455, "player1" }, { 233, "player2" }, {150, "Kevin" },{12, "Herr Beser" } });
+            Dictionary<string, int> highscores = this.firebase.queryOnce<Dictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
+            highscores = highscores == null ? new Dictionary<string, int>() : highscores;
+            HighscoresForm highscoresForm = new HighscoresForm(highscores);
             highscoresForm.Show();
         }
     }

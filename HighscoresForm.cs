@@ -8,21 +8,26 @@ namespace MultiplayerSnake
 {
     public partial class HighscoresForm : Form
     {
-        private Dictionary<int, string> scores;
+        private Dictionary<string, int> scores;
 
-        public HighscoresForm(Dictionary<int, string> scores)
+        public HighscoresForm(Dictionary<string, int> scores)
         {
+            this.scores = scores;
             InitializeComponent();
             Resize += HighscoresForm_Resize;
             this.HighscoresForm_Resize(null, null);
-            this.scores = scores;  
         }
+    
 
         private void HighscoresForm_Resize(object sender, EventArgs e)
         {
             pnScroll.Width = this.Width - 16;
             pbHighscores.Width = pnScroll.Size.Width - 17;
             pnScroll.Height = this.Height - 114;
+            if (!scores.Any())
+            {
+                pbHighscores.Height = pnScroll.Height;
+            }
 
             pbHighscores.Invalidate();
         }
@@ -59,15 +64,25 @@ namespace MultiplayerSnake
 
         private void pbHighscores_Paint(object sender, PaintEventArgs e)
         {   
-            firstScore = scores.ElementAt(0).Key;
+            
             e.Graphics.Clear(SystemColors.Control);
+            if (!scores.Any())
+            {
+                StringFormat sf = new StringFormat();
+                sf.LineAlignment = StringAlignment.Center;
+                sf.Alignment = StringAlignment.Center;
+                e.Graphics.DrawString("No Highscores found.", new Font("Arial", 12), Brushes.Red, e.ClipRectangle, sf);
+                return;
 
+            }
+
+            firstScore = scores.ElementAt(0).Value;
             // Calls the function drawBarChart()
             int i = 0;
-            foreach (KeyValuePair<int, string> score in scores)
+            foreach (KeyValuePair<string, int> score in scores)
             {
-                int scorePlayer = score.Key;
-                string namePlayer = score.Value;
+                int scorePlayer = score.Value;
+                string namePlayer = score.Key;
                 drawBarChart(e.Graphics, scorePlayer, i * 50 + 20, namePlayer, new SolidBrush(Color.FromName(colors[Math.Min(i, 3)])));
                 i++;
             }

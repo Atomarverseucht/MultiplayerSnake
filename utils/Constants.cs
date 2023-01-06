@@ -64,6 +64,7 @@ namespace MultiplayerSnake.Database
         /// </summary>
         public const string FIREBASE_PLAYER_VERIFY_NAME_KEY = FIREBASE_PLAYER_KEY + "/verifyName";
 
+        public const string FIREBASE_HIGHSCORES_KEY = "highscores";
         /// <summary>
         /// the background of the picture box
         /// </summary>
