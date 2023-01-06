@@ -347,11 +347,11 @@ namespace MultiplayerSnake
                 return;
             }
 
-            //Highscore fuss
+            //Highscore stuff
             Dictionary<string, int> highscores = this.firebase.queryOnce<Dictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
             highscores = highscores == null ? new Dictionary<string, int>() : highscores;
             highscores.Add(this.playerManager.name, this.playerManager.lastScore);
-            highscores.OrderByDescending(keyValuePair => keyValuePair.Value);
+            highscores = highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToDictionary(z => z.Key, y => y.Value);
             if (this.playerManager.lastScore <= 0)
             {
                 //don´t put data in database
@@ -370,7 +370,7 @@ namespace MultiplayerSnake
             lbStatus.ForeColor = Color.Red;
             lbStatus.Text = "Game Over!";
 
-            // show retry and highscore button and last score
+            // show retry, highscore button and last score
             btnRetry.Show();
             btnHighscores.Show();
             lbScore.Show();
