@@ -39,8 +39,9 @@
             // pbHighscores
             // 
             this.pbHighscores.Location = new System.Drawing.Point(0, 0);
+            this.pbHighscores.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.pbHighscores.Name = "pbHighscores";
-            this.pbHighscores.Size = new System.Drawing.Size(514, 100);
+            this.pbHighscores.Size = new System.Drawing.Size(1028, 192);
             this.pbHighscores.TabIndex = 0;
             this.pbHighscores.TabStop = false;
             this.pbHighscores.Paint += new System.Windows.Forms.PaintEventHandler(this.pbHighscores_Paint);
@@ -48,9 +49,10 @@
             // btClose
             // 
             this.btClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btClose.Location = new System.Drawing.Point(447, 318);
+            this.btClose.Location = new System.Drawing.Point(894, 612);
+            this.btClose.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.btClose.Name = "btClose";
-            this.btClose.Size = new System.Drawing.Size(75, 23);
+            this.btClose.Size = new System.Drawing.Size(150, 44);
             this.btClose.TabIndex = 1;
             this.btClose.Text = "Close";
             this.btClose.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
@@ -63,8 +65,9 @@
             this.label1.Dock = System.Windows.Forms.DockStyle.Left;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(0, 0);
+            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(104, 31);
+            this.label1.Size = new System.Drawing.Size(200, 63);
             this.label1.TabIndex = 2;
             this.label1.Text = "Top 10";
             // 
@@ -76,21 +79,23 @@
             this.pnScroll.AutoScroll = true;
             this.pnScroll.BackColor = System.Drawing.SystemColors.Control;
             this.pnScroll.Controls.Add(this.pbHighscores);
-            this.pnScroll.Location = new System.Drawing.Point(0, 34);
+            this.pnScroll.Location = new System.Drawing.Point(0, 65);
+            this.pnScroll.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.pnScroll.Name = "pnScroll";
-            this.pnScroll.Size = new System.Drawing.Size(534, 278);
+            this.pnScroll.Size = new System.Drawing.Size(1068, 535);
             this.pnScroll.TabIndex = 3;
             // 
             // HighscoresForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(534, 353);
+            this.ClientSize = new System.Drawing.Size(1068, 679);
             this.Controls.Add(this.pnScroll);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btClose);
-            this.MinimumSize = new System.Drawing.Size(550, 392);
+            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.MinimumSize = new System.Drawing.Size(1074, 688);
             this.Name = "HighscoresForm";
             this.Text = "Highscores";
             ((System.ComponentModel.ISupportInitialize)(this.pbHighscores)).EndInit();
