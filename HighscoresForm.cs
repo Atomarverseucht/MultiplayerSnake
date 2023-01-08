@@ -37,8 +37,12 @@ namespace MultiplayerSnake
 
         public void drawBarChart(Graphics g, int score, int yposition, string p_name, Brush b)
         {
+            Font drawFont = new Font("Arial", 12);
+            Font drawFontBold = new Font("Arial", 12, FontStyle.Bold);
+            float widthFirst = g.MeasureString(p_name, drawFontBold).Width;
             // displays the name
-            g.DrawString(p_name + ": " + score, new Font("Arial", 12), Brushes.Black, 10, yposition);
+            g.DrawString(p_name + ": ", drawFontBold, Brushes.Black, 10, yposition);
+            g.DrawString(score.ToString(), drawFont, Brushes.Black, 20 + widthFirst, yposition);
             // Bargraph
             g.FillRectangle(b, 8, yposition+20, calculateBar(score), 5);
         }
