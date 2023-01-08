@@ -220,7 +220,7 @@ namespace MultiplayerSnake.game
         /// <returns>the color with applied lightness</returns>
         public Color currentFoodLightness(double hue)
         {
-            if (this.foodLightness == 50)
+            if (this.foodLightness >= 50)
             {
                 foodLightness = -50;
             }

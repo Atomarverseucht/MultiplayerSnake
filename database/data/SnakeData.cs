@@ -11,7 +11,7 @@ namespace MultiplayerSnake.database
     public class SnakeData
     {
         public List<FoodsData> foods;
-        public ConcurrentDictionary<string, string> highscores;
+        public ConcurrentDictionary<string, int> highscores;
         public ConcurrentDictionary<string, PlayerData> players;
         public VariablesData variables;
     }

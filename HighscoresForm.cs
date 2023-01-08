@@ -40,13 +40,13 @@ namespace MultiplayerSnake
             // displays the name
             g.DrawString(p_name + ": " + score, new Font("Arial", 12), Brushes.Black, 10, yposition);
             // Bargraph
-            g.FillRectangle(b, 0, yposition+20, calculateBar(score), 5);
+            g.FillRectangle(b, 8, yposition+20, calculateBar(score), 5);
         }
 
         public int calculateBar(int score)
         {
             // Score * max. length / max. score
-            return score * (Width-100) / firstScore;
+            return score * (pbHighscores.Width - 8) / firstScore;
         }
 
         private void btClose_Click(object sender, EventArgs e)

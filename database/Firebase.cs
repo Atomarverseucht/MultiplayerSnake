@@ -95,10 +95,16 @@ namespace MultiplayerSnake
                             // else, wait for the current one to finish
                             this.updateTask.ContinueWith(t =>
                             {
-                                lock (this.updateTask) lock (value)
-                                    {
-                                        this.updateTask = this.client.Child("snake/" + key).PutAsync(value);
-                                    }
+                                try
+                                {
+                                    lock (this.updateTask) lock (value)
+                                        {
+                                            this.updateTask = this.client.Child("snake/" + key).PutAsync(value);
+                                        }
+                                } catch (Exception ex)
+                                {
+                                    Console.Error.WriteLine(ex);
+                                }
                             });
                         }
                     }
@@ -242,6 +248,10 @@ namespace MultiplayerSnake
                     this.playerManager.allSnakes.Clear();
                     this.playerManager.otherSnakes.Clear();
                 }
+
+                // HIGHSCORES
+
+                this.mainForm.highscores = snakeData.highscores;
             });
         }
     }
