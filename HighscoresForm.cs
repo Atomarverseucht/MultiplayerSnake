@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -8,6 +9,8 @@ namespace MultiplayerSnake
 {
     public partial class HighscoresForm : Form
     {
+        private MainForm mainForm;
+
         // all the highscores to render
         private Dictionary<string, int> scores;
 
@@ -17,17 +20,59 @@ namespace MultiplayerSnake
         // max. Score
         private int firstScore = 100;
 
-        public HighscoresForm(Dictionary<string, int> scores)
+        // this timer updates the highscores at regular intervals
+        private Timer timer;
+
+        public HighscoresForm(MainForm mainForm)
         {
             InitializeComponent();
+            this.mainForm = mainForm;
 
-            this.scores = scores;
+            this.updateHighscores();
 
             // add the resize listener
             Resize += HighscoresForm_Resize;
             this.HighscoresForm_Resize(null, null);
+            FormClosed += HighscoresForm_FormClosed;
+
+            // start the timer every second
+            this.timer = new Timer();
+            this.timer.Tick += Timer_Tick;
+            this.timer.Interval = 1000;
+            this.timer.Start();
         }
-    
+
+        /// <summary>
+        /// Updates all highscores with the current ones from db
+        /// </summary>
+        private void updateHighscores()
+        {
+            // get the current highscores
+            Dictionary<string, int> highscores = new Dictionary<string, int>(
+                this.mainForm.highscores == null ? new ConcurrentDictionary<string, int>() : this.mainForm.highscores
+            );
+
+            // only add our score, if it is not null and if it is an online game
+            if (this.mainForm.playerManager.lastScore > 0 && !this.mainForm.firebase.isOffline())
+            {
+                highscores.Add("[Your Score]", this.mainForm.playerManager.lastScore);
+            }
+
+            // sort the scores correctly
+            this.scores = highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToDictionary(z => z.Key, y => y.Value);
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            this.updateHighscores();
+            pbHighscores.Invalidate();
+        }
+
+        private void HighscoresForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            // stop the update timer
+            this.timer.Stop();
+        }
 
         private void HighscoresForm_Resize(object sender, EventArgs e)
         {

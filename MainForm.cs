@@ -503,17 +503,7 @@ namespace MultiplayerSnake
 
         private void btnHighscores_Click(object sender, EventArgs e)
         {
-            Dictionary<string, int> highscores = new Dictionary<string, int>(
-                this.highscores == null ? new ConcurrentDictionary<string, int>() : this.highscores
-            );
-
-            if (this.playerManager.lastScore > 0 && !this.firebase.isOffline())
-            {
-                highscores.Add("[Your Score]", this.playerManager.lastScore);
-            }
-            highscores = highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToDictionary(z => z.Key, y => y.Value);
-
-            HighscoresForm highscoresForm = new HighscoresForm(highscores);
+            HighscoresForm highscoresForm = new HighscoresForm(this);
             highscoresForm.Show();
         }
     }

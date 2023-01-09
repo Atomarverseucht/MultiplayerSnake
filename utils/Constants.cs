@@ -26,7 +26,7 @@ namespace MultiplayerSnake.Database
         /// <summary>
         /// the version of the client
         /// </summary>
-        public const int CLIENT_VERSION = 12;
+        public const int CLIENT_VERSION = 13;
 
         /// <summary>
         /// the database key for the version

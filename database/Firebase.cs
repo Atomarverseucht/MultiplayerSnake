@@ -35,6 +35,9 @@ namespace MultiplayerSnake
         // wheter the game should run offline
         private bool offline = true;
 
+        // did the version check indicate that this client is not compatible with the database?
+        public bool versionCheckFailed { get; set; } = false;
+
         public Firebase(MainForm mainForm)
         {
             this.client = new FirebaseClient(Constants.FIREBASE_URL, Constants.FIREBASE_CONFIG);
@@ -181,19 +184,15 @@ namespace MultiplayerSnake
         /// <returns></returns>
         private bool checkVersion(int dbVersion)
         {
-            // always true, when offline
-            if (this.offline)
-            {
-                return true;
-            }
-
             if (dbVersion > Constants.CLIENT_VERSION)
             {
+                this.versionCheckFailed = true;
                 MessageBox.Show("Your client is outdated. Please update your client to the newest version.", "Error");
                 return false;
             }
             else if (dbVersion < Constants.CLIENT_VERSION)
             {
+                this.versionCheckFailed = true;
                 MessageBox.Show("The database is outdated. Please wait for the database to update.", "Error");
                 return false;
             }
@@ -235,6 +234,11 @@ namespace MultiplayerSnake
             // listen for any update data from the database
             IDisposable subscription = this.client.Child("").AsObservable<SnakeData>((sender, e) => Console.Error.WriteLine(e.Exception), "").Subscribe(snapshot =>
             {
+                if (this.versionCheckFailed)
+                {
+                    return;
+                }
+
                 SnakeData snakeData = snapshot.Object;
                 if (snakeData == null)
                 {
@@ -301,7 +305,18 @@ namespace MultiplayerSnake
                 evnt.Set();
             });
 
-            if (!evnt.WaitOne(5000))
+            bool timeout = !evnt.WaitOne(5000);
+
+            // is the version outdated?
+            if (this.versionCheckFailed)
+            {
+                subscription.Dispose();
+                // wait until program closes
+                evnt.WaitOne();
+                return;
+            }
+
+            if (timeout)
             {
                 // if the listener above didn't run at least once in 5 seconds, it means that we are offline
                 if (MessageBox.Show("Can't connect to database.\n\nDo you want to play offline?", "Error", MessageBoxButtons.OKCancel) == DialogResult.OK)
