@@ -27,6 +27,9 @@ namespace MultiplayerSnake.game
         // food positions
         public ConcurrentDictionary<int, FoodsData> foods = new ConcurrentDictionary<int, FoodsData>();
 
+        // this list contains newly removed foods, so that the next database update doesn't mess with our food data
+        public List<string> removedFoods = new List<string>();
+
         // if not negative, only this type of food will spawn
         public int forcedFoodLevel = -1;
 
@@ -52,7 +55,7 @@ namespace MultiplayerSnake.game
         /// <param name="level">the level of the food</param>
         public void addFood(int x, int y, int level)
         {
-            this.addFood(new FoodsData(x, y, level));
+            this.addFood(new FoodsData(x, y, level, Guid.NewGuid().ToString()));
         }
 
         /// <summary>
@@ -77,8 +80,8 @@ namespace MultiplayerSnake.game
         {
             // the new food data
             ConcurrentDictionary<int, FoodsData> newFoods = new ConcurrentDictionary<int, FoodsData>();
-            // the food level of the removed food
-            int foodLevel = Constants.FOOD_LEVEL_RANDOM;
+            // the removed food
+            FoodsData oldFood = new FoodsData(0, 0, Constants.FOOD_LEVEL_RANDOM, Guid.NewGuid().ToString());
 
             lock (this.foods)
             {
@@ -95,7 +98,8 @@ namespace MultiplayerSnake.game
                     }
                     else
                     {
-                        foodLevel = food.level;
+                        oldFood = food;
+                        this.removedFoods.Add(food.uuid);
                     }
                 }
             }
@@ -107,7 +111,7 @@ namespace MultiplayerSnake.game
             }
             this.firebase.updateFoods();
 
-            return foodLevel;
+            return oldFood.level;
         }
 
         /// <summary>
@@ -136,7 +140,7 @@ namespace MultiplayerSnake.game
                 }
             }
 
-            return new FoodsData(foodX, foodY, this.randomFoodLevel());
+            return new FoodsData(foodX, foodY, this.randomFoodLevel(), Guid.NewGuid().ToString());
         }
 
         public int randomFoodLevel()

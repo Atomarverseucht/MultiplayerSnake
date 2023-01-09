@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -239,9 +240,20 @@ namespace MultiplayerSnake
 
                 // --------- foods ---------
 
-                this.foodManager.foods = snakeData.foods == null
+                ConcurrentDictionary<int, FoodsData> newFoods = snakeData.foods == null
                     ? new ConcurrentDictionary<int, FoodsData>()
                     : new ConcurrentDictionary<int, FoodsData>(snakeData.foods.Select((s, i) => new { s, i }).ToDictionary(x => x.i, x => x.s));
+
+                // the foods each have a uuid, so that if they get removed, the sync won't mess up
+                foreach (string removedUUID in this.foodManager.removedFoods)
+                {
+                    foreach (KeyValuePair<int, FoodsData> item in newFoods.ToList())
+                    {
+                        if (item.Value.uuid == removedUUID)
+                            newFoods.TryRemove(item.Key, out _);
+                    }
+                }
+                this.foodManager.foods = newFoods;
 
                 // --------- variables ---------
 

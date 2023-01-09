@@ -341,6 +341,7 @@ namespace MultiplayerSnake
         /// </summary>
         public void onGameEnd(bool kicked=false)
         {
+            this.foodManager.removedFoods.Clear();
             this.playerManager.lastScore = this.playerManager.snake.Count - 5;
             this.isGameEnded = true;
             // remove our snake from the board
