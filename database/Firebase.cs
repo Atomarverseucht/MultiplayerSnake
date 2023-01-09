@@ -1,17 +1,15 @@
 ﻿using Firebase.Database;
-using Firebase.Database.Offline;
 using Firebase.Database.Query;
-using Firebase.Database.Streaming;
 using MultiplayerSnake.database;
 using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
 using MultiplayerSnake.game;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -194,9 +192,9 @@ namespace MultiplayerSnake
         // set the listeners for firebase
         public void registerFireBaseListeners()
         {
+            ManualResetEvent evnt = new ManualResetEvent(false);
             this.client.Child("").AsObservable<SnakeData>((sender, e) => Console.Error.WriteLine(e.Exception), "").Subscribe(snapshot =>
             {
-
                 SnakeData snakeData = snapshot.Object;
                 if (snakeData == null)
                 {
@@ -218,6 +216,7 @@ namespace MultiplayerSnake
                 if (!this.checkVersion(snakeData.variables.version))
                 {
                     Application.Exit();
+                    evnt.Set();
                     return;
                 }
 
@@ -252,7 +251,13 @@ namespace MultiplayerSnake
                 // HIGHSCORES
 
                 this.mainForm.highscores = snakeData.highscores;
+                evnt.Set();
             });
+            if (!evnt.WaitOne(5000))
+            {
+                MessageBox.Show("Can't connect to database.\n\nPlease check your internet connection", "Error");
+                Application.Exit();
+            }
         }
     }
 }
