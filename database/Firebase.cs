@@ -32,6 +32,9 @@ namespace MultiplayerSnake
         // the task currently running to update the database
         private Task updateTask = Task.CompletedTask;
 
+        // wheter the game should run offline
+        private bool offline = true;
+
         public Firebase(MainForm mainForm)
         {
             this.client = new FirebaseClient(Constants.FIREBASE_URL, Constants.FIREBASE_CONFIG);
@@ -51,6 +54,12 @@ namespace MultiplayerSnake
         /// <returns>the requested data or null if it doesn't exist or an error occured</returns>
         public T queryOnce<T>(string key)
         {
+            // don't allow querys when offline
+            if (this.offline)
+            {
+                return default;
+            }
+
             try
             {
                 var task = this.client.Child("snake/" + key).OnceSingleAsync<T>();
@@ -74,6 +83,12 @@ namespace MultiplayerSnake
         /// <returns>if the data was set successfully</returns>
         public bool put<T>(string key, T value, bool async=false)
         {
+            // don't allow putting data when offline
+            if (this.offline)
+            {
+                return default;
+            }
+
             try
             {
                 if (async)
@@ -131,6 +146,12 @@ namespace MultiplayerSnake
         /// <returns>if the data was deleted successfully</returns>
         public bool delete(string key)
         {
+            // don't allow deleting data when offline
+            if (this.offline)
+            {
+                return default;
+            }
+
             try
             {
                 var task = this.client.Child("snake/" + key).DeleteAsync();
@@ -145,12 +166,27 @@ namespace MultiplayerSnake
         }
 
         /// <summary>
+        /// Is the conncetion to the database working?
+        /// </summary>
+        /// <returns></returns>
+        public bool isOffline()
+        {
+            return this.offline;
+        }
+
+        /// <summary>
         /// Compares the given version with the clients version.
         /// </summary>
         /// <param name="dbVersion">the current version of the database</param>
         /// <returns></returns>
         private bool checkVersion(int dbVersion)
         {
+            // always true, when offline
+            if (this.offline)
+            {
+                return true;
+            }
+
             if (dbVersion > Constants.CLIENT_VERSION)
             {
                 MessageBox.Show("Your client is outdated. Please update your client to the newest version.", "Error");
@@ -193,7 +229,7 @@ namespace MultiplayerSnake
         public void registerFireBaseListeners()
         {
             ManualResetEvent evnt = new ManualResetEvent(false);
-            this.client.Child("").AsObservable<SnakeData>((sender, e) => Console.Error.WriteLine(e.Exception), "").Subscribe(snapshot =>
+            IDisposable dis = this.client.Child("").AsObservable<SnakeData>((sender, e) => Console.Error.WriteLine(e.Exception), "").Subscribe(snapshot =>
             {
                 SnakeData snakeData = snapshot.Object;
                 if (snakeData == null)
@@ -253,10 +289,23 @@ namespace MultiplayerSnake
                 this.mainForm.highscores = snakeData.highscores;
                 evnt.Set();
             });
+
+            // if the listener above didn't run at least once in 5 seconds
             if (!evnt.WaitOne(5000))
             {
-                MessageBox.Show("Can't connect to database.\n\nPlease check your internet connection", "Error");
-                Application.Exit();
+                if (MessageBox.Show("Can't connect to database.\n\nDo you want to play offline?", "Error", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                {
+                    this.offline = true;
+                    dis.Dispose();
+                }
+                else
+                {
+                    Application.Exit();
+                }
+            }
+            else
+            {
+                this.offline = false;
             }
         }
     }

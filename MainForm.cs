@@ -147,14 +147,17 @@ namespace MultiplayerSnake
             // register the firebase listeners. this also performs a version check
             this.firebase.registerFireBaseListeners();
 
-            // let the user decide, which name he wants to use
-            if (!this.playerManager.chooseName())
+            if (!this.firebase.isOffline())
             {
-                return;
-            }
+                // let the user decide, which name he wants to use
+                if (!this.playerManager.chooseName())
+                {
+                    return;
+                }
 
-            // check if the game is already full
-            this.playerManager.checkMaxPlayerCount();
+                // check if the game is already full
+                this.playerManager.checkMaxPlayerCount();
+            }
 
             // choose the color
             this.playerManager.chooseRandomColor();
@@ -357,45 +360,49 @@ namespace MultiplayerSnake
             lbScore.Text = "Your Score: " + this.playerManager.lastScore;
 
             // start the highscore task a bit delayed, so the database can give us the current (correct) data
-            new Task(async () =>
+            // don't start at all, if we are offline
+            if (!this.firebase.isOffline())
             {
-                await Task.Delay(500);
-
-                if (this.playerManager.lastScore <= 0)
+                new Task(async () =>
                 {
-                    // don´t put data in database
-                    return;
-                }
+                    await Task.Delay(500);
 
-                // this is needed, because some names may get interpreted as a number and not string by the database
-                string highscoreName = "<>" + this.playerManager.name;
+                    if (this.playerManager.lastScore <= 0)
+                    {
+                        // don´t put data in database
+                        return;
+                    }
 
-                // try to get the current highscores from db
-                //ConcurrentDictionary<string, int> highscores = this.firebase.queryOnce<ConcurrentDictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
-                // make sure, it is not null
-                this.highscores = this.highscores == null ? new ConcurrentDictionary<string, int>() : this.highscores;
+                    // this is needed, because some names may get interpreted as a number and not string by the database
+                    string highscoreName = "<>" + this.playerManager.name;
 
-                // attempt to add our score
-                this.highscores.AddOrUpdate(highscoreName, this.playerManager.lastScore,
-                    // if the score is bigger than last time, update it to the bigger one, else just leave it as is
-                    (key, oldValue) => oldValue < this.playerManager.lastScore
-                    ? this.playerManager.lastScore
-                    : oldValue);
+                    // try to get the current highscores from db
+                    //ConcurrentDictionary<string, int> highscores = this.firebase.queryOnce<ConcurrentDictionary<string, int>>(Constants.FIREBASE_HIGHSCORES_KEY);
+                    // make sure, it is not null
+                    this.highscores = this.highscores == null ? new ConcurrentDictionary<string, int>() : this.highscores;
 
-                // sort the highscores by value
-                List<KeyValuePair<string, int>> orderedHighscores = this.highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToList();
-                if (orderedHighscores.Count() <= 10)
-                {
-                    // if the highscore list is not full (<=10), just send the new list to db
-                    this.firebase.put(Constants.FIREBASE_HIGHSCORES_KEY, this.highscores);
-                }
-                else if (orderedHighscores.ElementAt(this.highscores.Count - 1).Key != highscoreName)
-                {
-                    // otherwise we need to add the highscores to the database
-                    orderedHighscores.RemoveAt(this.highscores.Count - 1);
-                    this.firebase.put(Constants.FIREBASE_HIGHSCORES_KEY, orderedHighscores.ToDictionary(z => z.Key, y => y.Value));
-                }
-            }).Start();
+                    // attempt to add our score
+                    this.highscores.AddOrUpdate(highscoreName, this.playerManager.lastScore,
+                        // if the score is bigger than last time, update it to the bigger one, else just leave it as is
+                        (key, oldValue) => oldValue < this.playerManager.lastScore
+                        ? this.playerManager.lastScore
+                        : oldValue);
+
+                    // sort the highscores by value
+                    List<KeyValuePair<string, int>> orderedHighscores = this.highscores.OrderByDescending(keyValuePair => keyValuePair.Value).ToList();
+                    if (orderedHighscores.Count() <= 10)
+                    {
+                        // if the highscore list is not full (<=10), just send the new list to db
+                        this.firebase.put(Constants.FIREBASE_HIGHSCORES_KEY, this.highscores);
+                    }
+                    else if (orderedHighscores.ElementAt(this.highscores.Count - 1).Key != highscoreName)
+                    {
+                        // otherwise we need to add the highscores to the database
+                        orderedHighscores.RemoveAt(this.highscores.Count - 1);
+                        this.firebase.put(Constants.FIREBASE_HIGHSCORES_KEY, orderedHighscores.ToDictionary(z => z.Key, y => y.Value));
+                    }
+                }).Start();
+            }
         }
 
         /// <summary>
@@ -443,6 +450,16 @@ namespace MultiplayerSnake
         // update side status bar
         public void updateSideBar()
         {
+            // if we don't have a database connection, we tell the player in the sidebar
+            if (this.firebase.isOffline())
+            {
+                lbSidebar.Text = "<span style=\"color: red\">Offline Mode</span><br><br>"
+                    + (this.playerManager.snake.Any()
+                    ? ("Current score: " + (this.playerManager.snake.Count - 5))
+                    : "");
+                return;
+            }
+
             Dictionary<string, int> scores = new Dictionary<string, int>();
             string formattedScore = "";
 
@@ -484,10 +501,11 @@ namespace MultiplayerSnake
 
         private void btnHighscores_Click(object sender, EventArgs e)
         {
-            Dictionary<string, int> highscores = new Dictionary<string, int>(this.highscores);
-            highscores = highscores == null ? new Dictionary<string, int>() : highscores;
+            Dictionary<string, int> highscores = new Dictionary<string, int>(
+                this.highscores == null ? new ConcurrentDictionary<string, int>() : this.highscores
+            );
 
-            if (this.playerManager.lastScore > 0)
+            if (this.playerManager.lastScore > 0 && !this.firebase.isOffline())
             {
                 highscores.Add("[Your Score]", this.playerManager.lastScore);
             }
