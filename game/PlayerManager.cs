@@ -1,14 +1,12 @@
 ﻿using MultiplayerSnake.database.data;
 using MultiplayerSnake.Database;
 using MultiplayerSnake.utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using System.Windows.Input;
 
 namespace MultiplayerSnake.game
 {
@@ -23,39 +21,39 @@ namespace MultiplayerSnake.game
         // food manager
         private FoodManager foodManager;
 
+        // how long should the snake tail stay in place, after a food was eaten?
+        private int tailWaitCount = 0;
+
         // the player name
-        public string name = "";
+        public string name { get; set; } = "";
 
         // our snake color
-        public string color = "";
+        public string color { get; set; } = "";
 
         // the other players
-        public ConcurrentDictionary<string, PlayerData> otherSnakes = new ConcurrentDictionary<string, PlayerData>();
+        public ConcurrentDictionary<string, PlayerData> otherSnakes { get; set; } = new ConcurrentDictionary<string, PlayerData>();
 
         // used to count online (registered) players
-        public ConcurrentDictionary<string, PlayerData> allSnakes = new ConcurrentDictionary<string, PlayerData>();
+        public ConcurrentDictionary<string, PlayerData> allSnakes { get; set; } = new ConcurrentDictionary<string, PlayerData>();
 
         // can we send data to database (we should be invisible for other players
         // in countdown sequence, but visible for ourself)
-        public bool isInvisibleForOthers = true;
+        public bool isInvisibleForOthers { get; set; } = true;
 
         // our snake
-        public List<PlayerPositionData> snake = new List<PlayerPositionData>();
+        public List<PlayerPositionData> snake { get; set; } = new List<PlayerPositionData>();
 
         // horizontal snake move delta
-        public int deltaX = 10;
+        public int deltaX { get; set; } = 10;
 
         // vertical snake move delta
-        public int deltaY = 0;
+        public int deltaY { get; set; } = 0;
 
         // are we currently changing direction?
-        public bool changingDirection = false;
+        public bool changingDirection { get; set; } = false;
 
         // the last score we had, to display it after death in title
-        public int lastScore = 0;
-
-        // how long should the snake tail stay in place, after a food was eaten?
-        int tailWaitCount = 0;
+        public int lastScore { get; set; } = 0;
 
         public PlayerManager(MainForm mainForm)
         {
@@ -105,7 +103,7 @@ namespace MultiplayerSnake.game
         public void checkMaxPlayerCount()
         {
             // max 15 players
-            while (getOnlinePlayers() >= Constants.MAX_PLAYERS)
+            while (this.getOnlinePlayers() >= Constants.MAX_PLAYERS)
             {
                 DialogResult res = MessageBox.Show("The Game is full (15/15). Click the button to retry.", "Error", MessageBoxButtons.OKCancel);
                 if (res == DialogResult.Cancel)
@@ -139,6 +137,7 @@ namespace MultiplayerSnake.game
                 // replace unwanted symbols with underscore
                 this.name = this.name.Replace(".", "_").Replace("#", "_").Replace("$", "_").Replace("[", "_").Replace("]", "_").Replace("/", "_").Replace("<", "_").Replace(">", "_");
 
+                // is the name too long?
                 if (this.name.Length > 16)
                 {
                     MessageBox.Show("This name is too long.", "Error");
@@ -147,7 +146,7 @@ namespace MultiplayerSnake.game
                 }
 
                 // the color value is set, so there must be a user, that has taken this name
-                if (/*this.firebase.queryOnce<string>(Constants.FIREBASE_PLAYER_COLOR_KEY.Replace("%name%", this.name)) != null*/ this.allSnakes.TryGetValue(this.name, out var ignored))
+                if (this.allSnakes.TryGetValue(this.name, out _))
                 {
                     MessageBox.Show("Someone has already chosen this name.", "Error");
                     this.name = "";
@@ -173,10 +172,11 @@ namespace MultiplayerSnake.game
         /// </summary>
         public void chooseRandomColor()
         {
-            string[] unusedColors = getUnusedColors();
+            string[] unusedColors = this.getUnusedColors();
 
             this.color = unusedColors[Utils.RANDOM.Next(unusedColors.Length)];
 
+            // put the color in the database
             this.firebase.put(Constants.FIREBASE_PLAYER_COLOR_KEY.Replace("%name%", this.name), this.color);
         }
 
@@ -190,7 +190,7 @@ namespace MultiplayerSnake.game
 
             // getting all used colors
             int i = 0;
-            foreach (PlayerData otherSnake in otherSnakes.Values)
+            foreach (PlayerData otherSnake in this.otherSnakes.Values)
             {
                 if (otherSnake == null || otherSnake.color == null)
                 {
@@ -228,7 +228,7 @@ namespace MultiplayerSnake.game
             // the coordinates for the snake, we will calculate
             List<PlayerPositionData> snakeCoords = new List<PlayerPositionData>();
 
-            // just fill the array with 5 coordinate pairs, the x is descending, the higher the key is
+            // just fill the array with 5 coordinate pairs, which are next to each other
             for (int i = 0; i < 5; i++)
             {
                 int currentPart = i * 10;
@@ -262,11 +262,11 @@ namespace MultiplayerSnake.game
         }
 
         /// <summary>
-        /// draws the movement of other snakes to the graphics
+        /// draws the movement of other snakes to the graphics of the picture box
         /// </summary>
         public void handleOtherSnakes(Graphics g)
         {
-            foreach (var otherSnake in this.otherSnakes.Values)
+            foreach (PlayerData otherSnake in this.otherSnakes.Values)
             {
                 if (otherSnake == null || otherSnake.pos == null)
                 {
@@ -311,7 +311,7 @@ namespace MultiplayerSnake.game
                 }
             }
             // check for collisions with other players
-            if (checkForCollisionWithOtherSnakes())
+            if (this.checkForCollisionWithOtherSnakes())
             {
                 return true;
             }
@@ -342,15 +342,13 @@ namespace MultiplayerSnake.game
         public void moveSnake()
         {
             // create the new Snake's head, based on snake move delta
-            PlayerPositionData head = new PlayerPositionData(this.snake.ElementAt(0).x + deltaX, this.snake.ElementAt(0).y + deltaY);
+            PlayerPositionData head = new PlayerPositionData(this.snake.ElementAt(0).x + this.deltaX, this.snake.ElementAt(0).y + this.deltaY);
 
             // add the new head to the beginning of snake body
             this.snake.Insert(0, head);
 
-            // did we ate food?
-            bool ateFood = this.foodManager.hasEatenFood();
-
-            if (ateFood)
+            // did we eat food?
+            if (this.foodManager.hasEatenFood())
             {
                 // handle collection of food and get the count, how many parts must be added
                 int count = Utils.foodLevelToCount(this.foodManager.handleFoodCollect()) - 1;

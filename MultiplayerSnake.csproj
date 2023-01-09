@@ -68,7 +68,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="database\data\FoodsData.cs" />
+    <Compile Include="database\data\FoodData.cs" />
     <Compile Include="database\data\PlayerData.cs" />
     <Compile Include="database\data\PlayerPositionData.cs" />
     <Compile Include="database\data\VariablesData.cs" />

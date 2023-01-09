@@ -15,10 +15,8 @@ namespace MultiplayerSnake.Database
         /// </summary>
         public const string FIREBASE_API_KEY = "yQ1sXul4apTcUJgy6JwmW5lZ3r8uMbFn2tdQmbIY";
 
-        //public static readonly FirebaseAuthProvider FIREBASE_AUTH_PROVIDER = new FirebaseAuthProvider(new FirebaseConfig(FIREBASE_API_KEY));
-
         /// <summary>
-        /// The firebase configuration
+        /// the firebase configuration
         /// </summary>
         public static FirebaseOptions FIREBASE_CONFIG = new FirebaseOptions
         {
@@ -36,7 +34,7 @@ namespace MultiplayerSnake.Database
         public const string FIREBASE_VERSION_KEY = "variables/version";
 
         /// <summary>
-        /// 
+        /// the database key for the root of the food data
         /// </summary>
         public const string FIREBASE_FOODS_KEY = "foods";
 
@@ -64,7 +62,11 @@ namespace MultiplayerSnake.Database
         /// </summary>
         public const string FIREBASE_PLAYER_VERIFY_NAME_KEY = FIREBASE_PLAYER_KEY + "/verifyName";
 
+        /// <summary>
+        /// the database key for all highscores saved to the database
+        /// </summary>
         public const string FIREBASE_HIGHSCORES_KEY = "highscores";
+
         /// <summary>
         /// the background of the picture box
         /// </summary>
@@ -75,6 +77,11 @@ namespace MultiplayerSnake.Database
         /// </summary>
         public static readonly string[] COLORS = {"Aqua", "Yellow", "Red", "Black", "White", "DeepPink", "LawnGreen", "Orange",
             "SaddleBrown", "OrangeRed", "DarkViolet", "Gold", "Indigo", "Silver", "DarkGreen" };
+
+        /// <summary>
+        /// max player count (currently, set to the amount of colors, available)
+        /// </summary>
+        public static readonly int MAX_PLAYERS = COLORS.Length;
 
         /// <summary>
         /// the delay between snake updates in ms
@@ -91,11 +98,6 @@ namespace MultiplayerSnake.Database
         public const int FOOD_LEVEL_LESS_COLOR = 175;
         public const int FOOD_LEVEL_MEDIUM_COLOR = 110;
         public const int FOOD_LEVEL_MUCH_COLOR = 0;
-
-        /// <summary>
-        /// max player count (currently, set to the amount of colors, available)
-        /// </summary>
-        public static readonly int MAX_PLAYERS = COLORS.Length;
 
         // set the coordinate system resolution (always 16:9)
         public const int SNAKEBOARD_MAX_X = 1280;

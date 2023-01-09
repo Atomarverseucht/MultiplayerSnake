@@ -4,57 +4,65 @@ namespace MultiplayerSnake
 {
     class FullScreen
     {
-        Form TargetForm;
-
-        FormWindowState PreviousWindowState;
-
-        bool fullScreenEnabled = false;
+        private Form mainForm;
+        private FormWindowState previousWindowState;
+        private bool fullScreenEnabled = false;
 
         public FullScreen(Form targetForm)
         {
-            TargetForm = targetForm;
-            TargetForm.KeyDown += TargetForm_KeyDown;
+            this.mainForm = targetForm;
+            this.mainForm.KeyDown += this.TargetForm_KeyDown;
         }
 
         private void TargetForm_KeyDown(object sender, KeyEventArgs e)
         {
+            // if F11 is pressed, then we enter the fullscreen mode
             if (e.KeyData == Keys.F11)
             {
-                Toggle();
+                this.Toggle();
             }
         }
 
+        /// <summary>
+        /// This toggles the fullscreen mode.
+        /// </summary>
         public void Toggle()
         {
-            if (fullScreenEnabled)
+            if (this.fullScreenEnabled)
             {
-                Leave();
+                this.Leave();
             }
             else
             {
-                Enter();
+                this.Enter();
             }
         }
 
+        /// <summary>
+        /// This enters the fullscreen mode, if the window was not in fullscreen
+        /// </summary>
         public void Enter()
         {
-            if (!fullScreenEnabled)
+            if (!this.fullScreenEnabled)
             {
-                PreviousWindowState = TargetForm.WindowState;
-                TargetForm.WindowState = FormWindowState.Normal;
-                TargetForm.FormBorderStyle = FormBorderStyle.None;
-                TargetForm.WindowState = FormWindowState.Maximized;
-                fullScreenEnabled = true;
+                this.previousWindowState = this.mainForm.WindowState;
+                this.mainForm.WindowState = FormWindowState.Normal;
+                this.mainForm.FormBorderStyle = FormBorderStyle.None;
+                this.mainForm.WindowState = FormWindowState.Maximized;
+                this.fullScreenEnabled = true;
             }
         }
 
+        /// <summary>
+        /// This leaves the fullscreen mode, if the window was in fullscreen
+        /// </summary>
         public void Leave()
         {
-            if (TargetForm.WindowState == FormWindowState.Maximized && fullScreenEnabled)
+            if (this.mainForm.WindowState == FormWindowState.Maximized && this.fullScreenEnabled)
             {
-                TargetForm.FormBorderStyle = FormBorderStyle.Sizable;
-                TargetForm.WindowState = PreviousWindowState;
-                fullScreenEnabled = false;
+                this.mainForm.FormBorderStyle = FormBorderStyle.Sizable;
+                this.mainForm.WindowState = this.previousWindowState;
+                this.fullScreenEnabled = false;
             }
         }
     }

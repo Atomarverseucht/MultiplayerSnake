@@ -9,10 +9,7 @@ using System.Threading.Tasks;
 using MultiplayerSnake.utils;
 using MultiplayerSnake.database.data;
 using System.Diagnostics;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using System.Drawing.Drawing2D;
-using System.Xml.Linq;
-using Newtonsoft.Json;
 using System.Collections.Concurrent;
 
 namespace MultiplayerSnake
@@ -34,15 +31,6 @@ namespace MultiplayerSnake
         // the time of the last graphics update
         private long timeLastGraphicsUpdate = -1;
 
-        // class containing everything about food
-        public FoodManager foodManager;
-
-        // class containing everything about players
-        public PlayerManager playerManager;
-
-        // the database
-        public Firebase firebase;
-
         // is the game already ended?
         private bool isGameEnded = false;
 
@@ -53,8 +41,17 @@ namespace MultiplayerSnake
         // message filter for key down event
         private KeyMessageFilter m_filter;
 
+        // class containing everything about food
+        public FoodManager foodManager { get; set; }
+
+        // class containing everything about players
+        public PlayerManager playerManager { get; set; }
+
+        // the database
+        public Firebase firebase { get; set; }
+
         // all highscores from db
-        public ConcurrentDictionary<string, int> highscores;
+        public ConcurrentDictionary<string, int> highscores { get; set; }
 
         public MainForm()
         {
@@ -65,8 +62,10 @@ namespace MultiplayerSnake
             this.m_filter = new KeyMessageFilter(this);
             Application.AddMessageFilter(this.m_filter);
 
+            // on first run, make sure that all sizes are correct
             this.resizeSnakeboard(this);
 
+            // tell windows, that we need high priority
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
         }
 
@@ -247,18 +246,6 @@ namespace MultiplayerSnake
             }
         }
 
-        private void pbGame_Paint(object sender, PaintEventArgs e)
-        {
-            // we can only update, if there was an update requested by us
-            if (!this.updateRequested)
-                return;
-
-            this.updateRequested = false;
-
-            // tick the game with the graphics object
-            this.tick(e.Graphics);
-        }
-
         /// <summary>
         /// the game/main loop.
         /// </summary>
@@ -271,8 +258,22 @@ namespace MultiplayerSnake
                 await Task.Delay(1);
 
                 this.updateRequested = true;
+                // invalidating the picture box will trigger the event handler below which will
+                // execute the tick methodwith a graphics object, that is applied immediately
                 pbGame.Invalidate();
             }
+        }
+
+        private void pbGame_Paint(object sender, PaintEventArgs e)
+        {
+            // we can only update, if there was an update requested by us (and not the system)
+            if (!this.updateRequested)
+                return;
+
+            this.updateRequested = false;
+
+            // tick the game with the graphics object
+            this.tick(e.Graphics);
         }
 
         /// <summary>
@@ -325,7 +326,7 @@ namespace MultiplayerSnake
                 
 
                 // set the last update time to now
-                timeLastGraphicsUpdate = Utils.currentTimeMillis();
+                this.timeLastGraphicsUpdate = Utils.currentTimeMillis();
             }
 
             this.updateSideBar();
@@ -417,7 +418,7 @@ namespace MultiplayerSnake
                 lbScore.Hide();
                 btnRetry.Hide();
                 btnHighscores.Hide();
-                startGame();
+                this.startGame();
             }
         }
 

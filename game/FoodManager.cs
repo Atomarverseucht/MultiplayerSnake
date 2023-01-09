@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace MultiplayerSnake.game
 {
@@ -25,13 +24,15 @@ namespace MultiplayerSnake.game
         private int foodLightness = 0;
 
         // food positions
-        public ConcurrentDictionary<int, FoodsData> foods = new ConcurrentDictionary<int, FoodsData>();
+        public ConcurrentDictionary<int, FoodData> foods { get; set; } = new ConcurrentDictionary<int, FoodData>();
 
         // this list contains newly removed foods, so that the next database update doesn't mess with our food data
-        public List<string> removedFoods = new List<string>();
+        // the foods each have a uuid. if a food gets removed, it needs to be put in the removed foods
+        // because if we receive an update from the database, it could still be a tiny bit outdated data
+        public List<string> removedFoods { get; set; } = new List<string>();
 
         // if not negative, only this type of food will spawn
-        public int forcedFoodLevel = -1;
+        public int forcedFoodLevel { get; set; } = -1;
 
         public FoodManager(MainForm mainForm)
         {
@@ -39,7 +40,7 @@ namespace MultiplayerSnake.game
         }
 
         /// <summary>
-        /// This must be called, when all class variables in main form have been set.
+        /// This must be called when all class variables in main form have been set.
         /// </summary>
         public void init()
         {
@@ -55,14 +56,14 @@ namespace MultiplayerSnake.game
         /// <param name="level">the level of the food</param>
         public void addFood(int x, int y, int level)
         {
-            this.addFood(new FoodsData(x, y, level, Guid.NewGuid().ToString()));
+            this.addFood(new FoodData(x, y, level, Guid.NewGuid().ToString()));
         }
 
         /// <summary>
         /// save a new food position
         /// </summary>
         /// <param name="foodData">the food data to save</param>
-        public void addFood(FoodsData foodData)
+        public void addFood(FoodData foodData)
         {
             lock (this.foods)
             {
@@ -79,13 +80,13 @@ namespace MultiplayerSnake.game
         public int removeFood(int x, int y)
         {
             // the new food data
-            ConcurrentDictionary<int, FoodsData> newFoods = new ConcurrentDictionary<int, FoodsData>();
+            ConcurrentDictionary<int, FoodData> newFoods = new ConcurrentDictionary<int, FoodData>();
             // the removed food
-            FoodsData oldFood = new FoodsData(0, 0, Constants.FOOD_LEVEL_RANDOM, Guid.NewGuid().ToString());
+            FoodData oldFood = new FoodData(0, 0, Constants.FOOD_LEVEL_RANDOM, Guid.NewGuid().ToString());
 
             lock (this.foods)
             {
-                foreach (FoodsData food in this.foods.Values)
+                foreach (FoodData food in this.foods.Values)
                 {
                     // getting the data of the other food
                     int foodX = food.x;
@@ -99,7 +100,11 @@ namespace MultiplayerSnake.game
                     else
                     {
                         oldFood = food;
-                        this.removedFoods.Add(food.uuid);
+                        // we don't need to care about database sync issues, when we are offline
+                        if (!this.firebase.isOffline())
+                        {
+                            this.removedFoods.Add(food.uuid);
+                        }
                     }
                 }
             }
@@ -117,7 +122,7 @@ namespace MultiplayerSnake.game
         /// <summary>
         /// generate a new random food location
         /// </summary>
-        public FoodsData genFood()
+        public FoodData genFood()
         {
             // Generate a random number the food x-coordinate
             var foodX = Utils.randomCoordinateX();
@@ -132,15 +137,14 @@ namespace MultiplayerSnake.game
 
                 foreach (PlayerPositionData part in playerData.pos)
                 {
-                    bool has_eaten = part.x == foodX && part.y == foodY;
-                    if (has_eaten)
+                    if (part.x == foodX && part.y == foodY)
                     {
-                        genFood();
+                        this.genFood();
                     }
                 }
             }
 
-            return new FoodsData(foodX, foodY, this.randomFoodLevel(), Guid.NewGuid().ToString());
+            return new FoodData(foodX, foodY, this.randomFoodLevel(), Guid.NewGuid().ToString());
         }
 
         public int randomFoodLevel()
@@ -182,11 +186,11 @@ namespace MultiplayerSnake.game
         {
             lock (this.foods)
             {
-                if (this.playerManager.getActivePlayers() <= 1 && this.foods.Count == 0)
+                if (this.foods.Count == 0)
                 {
                     lock (this.foods)
                     {
-                        addFood(Utils.randomCoordinateX(), Utils.randomCoordinateY(), randomFoodLevel());
+                        this.addFood(Utils.randomCoordinateX(), Utils.randomCoordinateY(), randomFoodLevel());
                         this.firebase.updateFoods();
                     }
                 }
@@ -202,7 +206,7 @@ namespace MultiplayerSnake.game
         {
             lock (this.foods)
             {
-                foreach (FoodsData food in this.foods.Values)
+                foreach (FoodData food in this.foods.Values)
                 {
                     lock (this.foods)
                     {
@@ -226,10 +230,10 @@ namespace MultiplayerSnake.game
         {
             if (this.foodLightness >= 50)
             {
-                foodLightness = -50;
+                this.foodLightness = -50;
             }
 
-            return Utils.ColorFromHSV(hue, 1, ((foodLightness < 0 ? (foodLightness * -1) : foodLightness) + 50) / 100.0);
+            return Utils.ColorFromHSV(hue, 1, ((this.foodLightness < 0 ? (this.foodLightness * -1) : this.foodLightness) + 50) / 100.0);
         }
 
         /// <summary>
@@ -240,7 +244,7 @@ namespace MultiplayerSnake.game
         {
             lock (this.foods)
             {
-                foreach (FoodsData food in this.foods.Values)
+                foreach (FoodData food in this.foods.Values)
                 {
                     lock (this.foods)
                     {
@@ -272,7 +276,7 @@ namespace MultiplayerSnake.game
 
                 for (var i = 0; i < foodCount; i++)
                 {
-                    FoodsData randomFood = null;
+                    FoodData randomFood = null;
                     bool noFoodPosFound = true;
 
                     // search for a food pos, which isn't in use
@@ -290,7 +294,7 @@ namespace MultiplayerSnake.game
                         lock (this.foods)
                         {
                             // check all other food positions to avoid overlap
-                            foreach (FoodsData food in this.foods.Values)
+                            foreach (FoodData food in this.foods.Values)
                             {
                                 lock (this.foods)
                                 {
@@ -303,7 +307,7 @@ namespace MultiplayerSnake.game
                         }
                     }
 
-                    // and add it
+                    // and add it, when found
                     this.addFood(randomFood);
                 }
 

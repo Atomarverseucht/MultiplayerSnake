@@ -1,9 +1,14 @@
-﻿// library from https://www.codeproject.com/Tips/822756/Input-Box-in-Csharp-for-WindowsForms
+﻿// 
+// library from https://www.codeproject.com/Tips/822756/Input-Box-in-Csharp-for-WindowsForms
+// license: The Code Project Open License (CPOL) 1.02 (https://www.codeproject.com/info/cpol10.aspx)
+// author: Member 11100697
+//
 
 using System;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Reflection;
+
 namespace MultiplayerSnake
 {
     public static class InputBox

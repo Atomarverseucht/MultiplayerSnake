@@ -89,7 +89,9 @@ namespace MultiplayerSnake.utils
             }
         }
 
-        // From: https://stackoverflow.com/questions/1335426/is-there-a-built-in-c-net-system-api-for-hsv-to-rgb
+        //
+        // Everything below from: https://stackoverflow.com/questions/1335426/is-there-a-built-in-c-net-system-api-for-hsv-to-rgb
+        //
 
         /// <summary>
         /// Converts a Color object to HSV.

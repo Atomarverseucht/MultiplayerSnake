@@ -9,7 +9,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -63,7 +62,7 @@ namespace MultiplayerSnake
 
             try
             {
-                var task = this.client.Child("snake/" + key).OnceSingleAsync<T>();
+                Task<T> task = this.client.Child("snake/" + key).OnceSingleAsync<T>();
                 Task.WaitAll(task);
                 return task.Result;
             }
@@ -126,7 +125,7 @@ namespace MultiplayerSnake
                 else
                 {
                     Task.WaitAll(this.updateTask);
-                    var task = this.client.Child("snake/" + key).PutAsync<T>(value);
+                    Task task = this.client.Child("snake/" + key).PutAsync<T>(value);
                     Task.WaitAll(task);
                 }
 
@@ -155,7 +154,7 @@ namespace MultiplayerSnake
 
             try
             {
-                var task = this.client.Child("snake/" + key).DeleteAsync();
+                Task task = this.client.Child("snake/" + key).DeleteAsync();
                 Task.WaitAll(task);
                 return true;
             }
@@ -219,6 +218,7 @@ namespace MultiplayerSnake
         /// <param name="snakeData">the position data to save</param>
         public void setPlayerData(List<PlayerPositionData> snakeData)
         {
+            // if we are invisible, send empty list
             if (this.playerManager.isInvisibleForOthers)
             {
                 snakeData = new List<PlayerPositionData>();
@@ -229,8 +229,11 @@ namespace MultiplayerSnake
         // set the listeners for firebase
         public void registerFireBaseListeners()
         {
+            // gets triggerd on the first initial pull from the database
             ManualResetEvent evnt = new ManualResetEvent(false);
-            IDisposable dis = this.client.Child("").AsObservable<SnakeData>((sender, e) => Console.Error.WriteLine(e.Exception), "").Subscribe(snapshot =>
+
+            // listen for any update data from the database
+            IDisposable subscription = this.client.Child("").AsObservable<SnakeData>((sender, e) => Console.Error.WriteLine(e.Exception), "").Subscribe(snapshot =>
             {
                 SnakeData snakeData = snapshot.Object;
                 if (snakeData == null)
@@ -240,17 +243,19 @@ namespace MultiplayerSnake
 
                 // --------- foods ---------
 
-                ConcurrentDictionary<int, FoodsData> newFoods = snakeData.foods == null
-                    ? new ConcurrentDictionary<int, FoodsData>()
-                    : new ConcurrentDictionary<int, FoodsData>(snakeData.foods.Select((s, i) => new { s, i }).ToDictionary(x => x.i, x => x.s));
+                ConcurrentDictionary<int, FoodData> newFoods = snakeData.foods == null
+                    ? new ConcurrentDictionary<int, FoodData>()
+                    : new ConcurrentDictionary<int, FoodData>(snakeData.foods.Select((s, i) => new { s, i }).ToDictionary(x => x.i, x => x.s));
 
-                // the foods each have a uuid, so that if they get removed, the sync won't mess up
                 foreach (string removedUUID in this.foodManager.removedFoods)
                 {
-                    foreach (KeyValuePair<int, FoodsData> item in newFoods.ToList())
+                    foreach (KeyValuePair<int, FoodData> item in newFoods.ToList())
                     {
+                        // if the food's uuid is in removed food, then this food is outdated and should not be in the dictionary
                         if (item.Value.uuid == removedUUID)
+                        {
                             newFoods.TryRemove(item.Key, out _);
+                        }
                     }
                 }
                 this.foodManager.foods = newFoods;
@@ -273,22 +278,16 @@ namespace MultiplayerSnake
                 if (snakeData.players != null)
                 {
                     this.playerManager.allSnakes = snakeData.players;
-                    foreach (KeyValuePair<string, PlayerData> player in snakeData.players)
+
+                    // check if the database wants us to have a new color
+                    if (snakeData.players.TryGetValue(this.playerManager.name, out PlayerData playerData) && !string.IsNullOrWhiteSpace(playerData.color))
                     {
-                        string key = player.Key;
-                        PlayerData playerData = player.Value;
-
-                        // check if the update data is for us and the color is not null or empty
-                        if (key == this.playerManager.name && !string.IsNullOrWhiteSpace(playerData.color))
-                        {
-                            // then we can set our own color
-                            this.playerManager.color = playerData.color;
-                        }
-
-                        // we need to have a seperate dict with only other players
-                        this.playerManager.otherSnakes = new ConcurrentDictionary<string, PlayerData>(this.playerManager.allSnakes);
-                        this.playerManager.otherSnakes.TryRemove(this.playerManager.name, out var ignored3);
+                        this.playerManager.color = playerData.color;
                     }
+
+                    // we need to have a seperate dict with only other players
+                    this.playerManager.otherSnakes = new ConcurrentDictionary<string, PlayerData>(this.playerManager.allSnakes);
+                    this.playerManager.otherSnakes.TryRemove(this.playerManager.name, out _);
                 }
                 else
                 {
@@ -296,19 +295,19 @@ namespace MultiplayerSnake
                     this.playerManager.otherSnakes.Clear();
                 }
 
-                // HIGHSCORES
+                // --------- highscores ---------
 
                 this.mainForm.highscores = snakeData.highscores;
                 evnt.Set();
             });
 
-            // if the listener above didn't run at least once in 5 seconds
             if (!evnt.WaitOne(5000))
             {
+                // if the listener above didn't run at least once in 5 seconds, it means that we are offline
                 if (MessageBox.Show("Can't connect to database.\n\nDo you want to play offline?", "Error", MessageBoxButtons.OKCancel) == DialogResult.OK)
                 {
                     this.offline = true;
-                    dis.Dispose();
+                    subscription.Dispose();
                 }
                 else
                 {
@@ -317,6 +316,7 @@ namespace MultiplayerSnake
             }
             else
             {
+                // we are online
                 this.offline = false;
             }
         }
