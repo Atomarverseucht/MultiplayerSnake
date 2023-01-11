@@ -355,10 +355,11 @@ namespace MultiplayerSnake
             lbStatus.ForeColor = Color.Red;
             lbStatus.Text = "Game Over!";
 
-            // show retry, highscore button and last score
+            // show retry, highscore and help button and last score
             btnRetry.Show();
             btnHighscores.Show();
             lbScore.Show();
+            btnHelp.Show();
             lbScore.Text = "Your Score: " + this.playerManager.lastScore;
 
             // start the highscore task a bit delayed, so the database can give us the current (correct) data
@@ -418,6 +419,7 @@ namespace MultiplayerSnake
                 lbScore.Hide();
                 btnRetry.Hide();
                 btnHighscores.Hide();
+                btnHelp.Hide();
                 this.startGame();
             }
         }

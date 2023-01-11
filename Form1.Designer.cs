@@ -66,6 +66,7 @@
             this.btnRetry.Name = "btnRetry";
             this.btnRetry.Size = new System.Drawing.Size(75, 23);
             this.btnRetry.TabIndex = 4;
+            this.btnRetry.TabStop = false;
             this.btnRetry.Text = "Retry (r)";
             this.btnRetry.UseVisualStyleBackColor = true;
             this.btnRetry.Visible = false;
@@ -111,6 +112,7 @@
             this.btnHighscores.Name = "btnHighscores";
             this.btnHighscores.Size = new System.Drawing.Size(75, 23);
             this.btnHighscores.TabIndex = 9;
+            this.btnHighscores.TabStop = false;
             this.btnHighscores.Text = "Highscores";
             this.btnHighscores.UseVisualStyleBackColor = true;
             this.btnHighscores.Visible = false;
@@ -123,8 +125,10 @@
             this.btnHelp.Name = "btnHelp";
             this.btnHelp.Size = new System.Drawing.Size(25, 25);
             this.btnHelp.TabIndex = 10;
+            this.btnHelp.TabStop = false;
             this.btnHelp.Text = "?";
             this.btnHelp.UseVisualStyleBackColor = true;
+            this.btnHelp.Visible = false;
             this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
             // 
             // MainForm
