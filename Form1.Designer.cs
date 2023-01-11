@@ -35,6 +35,7 @@
             this.lbSidebar = new TheArtOfDev.HtmlRenderer.WinForms.HtmlLabel();
             this.lbScore = new System.Windows.Forms.Label();
             this.btnHighscores = new System.Windows.Forms.Button();
+            this.btnHelp = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).BeginInit();
             this.SuspendLayout();
             // 
@@ -115,12 +116,24 @@
             this.btnHighscores.Visible = false;
             this.btnHighscores.Click += new System.EventHandler(this.btnHighscores_Click);
             // 
+            // btnHelp
+            // 
+            this.btnHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnHelp.Location = new System.Drawing.Point(797, 12);
+            this.btnHelp.Name = "btnHelp";
+            this.btnHelp.Size = new System.Drawing.Size(25, 25);
+            this.btnHelp.TabIndex = 10;
+            this.btnHelp.Text = "?";
+            this.btnHelp.UseVisualStyleBackColor = true;
+            this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(834, 461);
+            this.Controls.Add(this.btnHelp);
             this.Controls.Add(this.btnHighscores);
             this.Controls.Add(this.lbScore);
             this.Controls.Add(this.lbSidebar);
@@ -128,10 +141,13 @@
             this.Controls.Add(this.btnRetry);
             this.Controls.Add(this.pbGame);
             this.Controls.Add(this.lbStatus);
+            this.HelpButton = true;
             this.MinimumSize = new System.Drawing.Size(850, 500);
             this.Name = "MainForm";
             this.Text = "Multiplayer Snake";
+            this.HelpButtonClicked += new System.ComponentModel.CancelEventHandler(this.MainForm_HelpButtonClicked);
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.MainForm_HelpRequested);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).EndInit();
             this.ResumeLayout(false);
@@ -148,6 +164,7 @@
         private TheArtOfDev.HtmlRenderer.WinForms.HtmlLabel lbSidebar;
         private System.Windows.Forms.Label lbScore;
         private System.Windows.Forms.Button btnHighscores;
+        private System.Windows.Forms.Button btnHelp;
     }
 }
 

@@ -506,5 +506,27 @@ namespace MultiplayerSnake
             HighscoresForm highscoresForm = new HighscoresForm(this);
             highscoresForm.Show();
         }
+
+        private void MainForm_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            MessageBox.Show("Controls:\n" +
+                "WASD/Arrow keys: Change moving direction\n" +
+                "R/Enter: Retry\n\n" +
+                "Food levels:\n" +
+                "Blue: +1\n" +
+                "Green: +2\n" +
+                "Red: +3\n" +
+                "Fast blinking: Random between -5 and +5", "Help");
+        }
+
+        private void MainForm_HelpButtonClicked(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            this.MainForm_HelpRequested(null, null);
+        }
+
+        private void btnHelp_Click(object sender, EventArgs e)
+        {
+            this.MainForm_HelpRequested(null, null);
+        }
     }
 }
