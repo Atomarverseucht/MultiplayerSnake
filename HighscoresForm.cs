@@ -65,7 +65,7 @@ namespace MultiplayerSnake
         private void Timer_Tick(object sender, EventArgs e)
         {
             this.updateHighscores();
-            pbHighscores.Invalidate();
+            this.HighscoresForm_Resize(null, null);
         }
 
         private void HighscoresForm_FormClosed(object sender, FormClosedEventArgs e)
