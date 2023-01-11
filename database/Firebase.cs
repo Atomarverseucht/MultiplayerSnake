@@ -187,12 +187,14 @@ namespace MultiplayerSnake
             if (dbVersion > Constants.CLIENT_VERSION)
             {
                 this.versionCheckFailed = true;
+                this.mainForm.gameEnded = true;
                 MessageBox.Show("Your client is outdated. Please update your client to the newest version.", "Error");
                 return false;
             }
             else if (dbVersion < Constants.CLIENT_VERSION)
             {
                 this.versionCheckFailed = true;
+                this.mainForm.gameEnded = true;
                 MessageBox.Show("The database is outdated. Please wait for the database to update.", "Error");
                 return false;
             }
@@ -270,7 +272,7 @@ namespace MultiplayerSnake
                 this.foodManager.forcedFoodLevel = snakeData.variables.forcedFoodLevel;
 
                 // check for version changes, if version changed, close app
-                if (!this.checkVersion(snakeData.variables.version))
+                if (!this.versionCheckFailed && !this.checkVersion(snakeData.variables.version))
                 {
                     Application.Exit();
                     evnt.Set();

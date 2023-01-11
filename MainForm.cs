@@ -32,7 +32,7 @@ namespace MultiplayerSnake
         private long timeLastGraphicsUpdate = -1;
 
         // is the game already ended?
-        private bool isGameEnded = false;
+        public bool gameEnded { get; set; } = false;
 
         // the scaling of the picturebox graphics object
         private float scalingX = 1;
@@ -189,7 +189,7 @@ namespace MultiplayerSnake
             this.playerManager.isInvisibleForOthers = true;
             this.playerManager.snake = this.playerManager.generateRandomSnake();
             // reset game isn't ended
-            this.isGameEnded = false;
+            this.gameEnded = false;
 
             // start the countdown
             _ = this.startCountdown();
@@ -307,11 +307,11 @@ namespace MultiplayerSnake
                     {
                         // wait for countdown finsih
                     }
-                    else if (this.isGameEnded || this.playerManager.snake.Count <= 0 || this.playerManager.checkForCollision())
+                    else if (this.gameEnded || this.playerManager.snake.Count <= 0 || this.playerManager.checkForCollision())
                     {
                         // game ended for us
                         // first call, then call onGameEnd()
-                        if (!this.isGameEnded) this.onGameEnd();
+                        if (!this.gameEnded) this.onGameEnd();
                     }
                     else
                     {
@@ -344,7 +344,7 @@ namespace MultiplayerSnake
         {
             this.foodManager.removedFoods.Clear();
             this.playerManager.lastScore = this.playerManager.snake.Count - 5;
-            this.isGameEnded = true;
+            this.gameEnded = true;
             // remove our snake from the board
             this.firebase.setPlayerData(new List<PlayerPositionData>());
             // drop random food from out snake
@@ -413,7 +413,7 @@ namespace MultiplayerSnake
         public void onRetry()
         {
             // if the player isn't alive, restart
-            if (this.isGameEnded)
+            if (this.gameEnded)
             {
                 lbScore.Hide();
                 btnRetry.Hide();
